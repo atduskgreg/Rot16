@@ -7,3 +7,4 @@ A game!
 * Check for adjacent tile combinability
 * UI for initiating drag
 * GameManager implements drag combine
+* Generate and display next tile
