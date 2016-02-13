@@ -6,6 +6,17 @@ public class TileChoice : MonoBehaviour {
 	public int tileId;
 	public int[] allowedStartingTiles;
 
+	public static Dictionary<string, int> combinationRules = new Dictionary< string, int>(){
+		{"0+1", 2},
+		{"1+0", 2},
+		{"4+5", 9},
+		{"5+4", 9},
+		{"5+6", 10},
+		{"6+5", 10},
+		{"6+7", 11},
+		{"7+6", 11}
+	};
+
 	public void assignStartingTile(){
 		tileId = allowedStartingTiles[Random.Range(0, allowedStartingTiles.Length)];
 		setTileId(tileId);
@@ -35,6 +46,8 @@ public class TileChoice : MonoBehaviour {
 	}
 
 	public bool canCombineWith(TileChoice tile){
+
+
 		return false;
 	}
 
