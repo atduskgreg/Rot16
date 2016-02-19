@@ -6,6 +6,10 @@ public class TileChoice : MonoBehaviour {
 	public int tileId;
 	public int[] allowedStartingTiles;
 
+	int id;
+
+	BoardManager boardManager;
+
 	public static Dictionary<string, int> combinationRules = new Dictionary< string, int>(){
 		{"0+1", 2},
 		{"1+0", 2},
@@ -57,42 +61,33 @@ public class TileChoice : MonoBehaviour {
 		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
 	}
 
+	public void SetId(int i){
+		id = i;
+	}
+
+	public int GetId(){
+		return id;
+	}
 	void Start () {
+		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
 		assignStartingTile();
 	}
 	
-	// Update is called once per frame
 	void Update () {
 		
 	}
+	
 
-
-
+	void OnMouseEnter(){
+		boardManager.MouseInTile(gameObject);
+	}
+ 
 	void OnMouseDown(){
-		print ("OnMouseDown");
-		// tell the board manager the starting mouse position
-
-		//		BoardManager.TileWasTapped(gameObject);
-		rotateTile();
+		print ("down: " + id + " tileId " + tileId);
+		boardManager.MouseDownInTile(gameObject);
 	}
-
-	void OnMouseDrag(){
-		if(Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0){
-			print ("click " + tileId);
-		} else {
-
-			print ("drag " + tileId);
-		}
-
-
-
-//		print ("dx: " + Input.GetAxis("Mouse X") +"x" +Input.GetAxis("Mouse Y"));
-	}
-
+	
 	void OnMouseUp(){
-		// ask the board manager for the starting mouse position
-		// if its the same rotate
-		// if not: tell the board manager to slide
-//		print("OnMouseUp in tile: " + tileId);
+		boardManager.MouseUp();
 	}
 }

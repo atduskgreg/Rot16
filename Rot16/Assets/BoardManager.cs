@@ -13,10 +13,30 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	void PopulateTiles(){
+		System.Random randomSequence = new System.Random(1234);
 		for (int col = 0; col < gridWidth; col++) {
 			for (int row = 0; row < gridWidth; row++) {
 				GameObject tile = (GameObject)Instantiate(tilePrefab, new Vector3(col * spriteSize*2, row * spriteSize*2), Quaternion.identity);			
+				tile.GetComponent<TileChoice>().SetId(randomSequence.Next());
 			}
+		}
+	}
+
+
+	GameObject mouseDownStartTile;
+	public void MouseDownInTile(GameObject tile){
+		mouseDownStartTile = tile;
+	}
+
+	GameObject mouseInTile;
+	public void MouseInTile(GameObject tile){
+		mouseInTile = tile;
+	}
+
+	public void MouseUp(){
+		print ("up: " + mouseInTile.GetComponent<TileChoice>().GetId());
+		if(mouseInTile.GetComponent<TileChoice>().GetId() == mouseDownStartTile.GetComponent<TileChoice>().GetId()){
+			mouseInTile.GetComponent<TileChoice>().rotateTile();
 		}
 	}
 
