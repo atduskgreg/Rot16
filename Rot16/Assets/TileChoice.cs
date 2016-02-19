@@ -66,7 +66,33 @@ public class TileChoice : MonoBehaviour {
 		
 	}
 
+
+
 	void OnMouseDown(){
+		print ("OnMouseDown");
+		// tell the board manager the starting mouse position
+
+		//		BoardManager.TileWasTapped(gameObject);
 		rotateTile();
+	}
+
+	void OnMouseDrag(){
+		if(Input.GetAxis("Mouse X") == 0 && Input.GetAxis("Mouse Y") == 0){
+			print ("click " + tileId);
+		} else {
+
+			print ("drag " + tileId);
+		}
+
+
+
+//		print ("dx: " + Input.GetAxis("Mouse X") +"x" +Input.GetAxis("Mouse Y"));
+	}
+
+	void OnMouseUp(){
+		// ask the board manager for the starting mouse position
+		// if its the same rotate
+		// if not: tell the board manager to slide
+//		print("OnMouseUp in tile: " + tileId);
 	}
 }

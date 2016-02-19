@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class PopulateTiles : MonoBehaviour {
+public class BoardManager : MonoBehaviour {
 	public GameObject tilePrefab;
 
 	int gridWidth = 4;
@@ -9,15 +9,21 @@ public class PopulateTiles : MonoBehaviour {
 	int spriteSize = 312;
 
 	void Start () {
+		PopulateTiles();
+	}
+
+	void PopulateTiles(){
 		for (int col = 0; col < gridWidth; col++) {
 			for (int row = 0; row < gridWidth; row++) {
-				GameObject tile = (GameObject)Instantiate(tilePrefab, new Vector3(col * spriteSize*2, row * spriteSize*2), Quaternion.identity);
-				
+				GameObject tile = (GameObject)Instantiate(tilePrefab, new Vector3(col * spriteSize*2, row * spriteSize*2), Quaternion.identity);			
 			}
 		}
 	}
+
+	void OnMouseDown(){
+		print ("clicked on BoardManager");
+	}
 	
-	// Update is called once per frame
 	void Update () {
 	
 	}
