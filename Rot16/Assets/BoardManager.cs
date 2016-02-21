@@ -41,30 +41,41 @@ public class BoardManager : MonoBehaviour {
 		rows.Add (new Tile[]{AllTiles [3, 0], AllTiles [3, 1], AllTiles [3, 2], AllTiles [3, 3]});
 	}
 
-//	bool MakeOneMoveDownIndex(Tile[] LineOfTiles)
-//	{
-//		for (int i =0; i< LineOfTiles.Length-1; i++) 
-//		{
-//			//MOVE BLOCK 
-//			if (LineOfTiles[i].Number == 0 && LineOfTiles[i+1].Number != 0)
-//			{
-//				LineOfTiles[i].Number = LineOfTiles[i+1].Number;
-//				LineOfTiles[i+1].Number = 0;
-//				return true;
-//			}
-//			// MERGE BLOCK
-//			if (LineOfTiles[i].Number!= 0 && LineOfTiles[i].Number == LineOfTiles[i+1].Number &&
-//			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i+1].mergedThisTurn == false)
-//			{
-//				LineOfTiles[i].Number *= 2;
-//				LineOfTiles[i+1].Number = 0;
-//				LineOfTiles[i].mergedThisTurn = true;
-//				return true;
-//			}
-//		}
-//		return false;
-//	}
+	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
+		print ("MakeOneMoveDownIndex: " + LineOfTiles.Length);
+		for (int i =0; i< LineOfTiles.Length-1; i++) 
+		{
+			print (i);
+			//MOVE BLOCK 
+			// move into empty spaces.
+			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i+1].isEmpty()){
+				print ("moving into an empty space");
 
+				LineOfTiles[i].setTileId(LineOfTiles[i+1].tileId);
+				LineOfTiles[i+1].setTileId(Tile.EmptyTileId);
+				return true;
+			}
+			// MERGE BLOCK
+			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
+			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i+1].mergedThisTurn == false){
+				print ("mergin tiles");
+
+				LineOfTiles[i].CombineWith(LineOfTiles[i+1]);
+
+				LineOfTiles[i+1].setTileId(Tile.EmptyTileId);
+
+				LineOfTiles[i].mergedThisTurn = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private void ResetMergedFlags(){
+		foreach (Tile t in AllTiles){
+			t.mergedThisTurn = false;
+		}
+	}
 
 	Tile mouseDownStartTile;
 	public void MouseDownInTile(Tile tile){
@@ -82,14 +93,41 @@ public class BoardManager : MonoBehaviour {
 			return;
 		} 
 
+		/*
+		 * case MoveDirection.Down:
+				while (MakeOneMoveUpIndex(columns[i])) {}
+				break;
+			case MoveDirection.Left:
+				while (MakeOneMoveDownIndex(rows[i])) {}
+				break;
+			case MoveDirection.Right:
+				while (MakeOneMoveUpIndex(rows[i])) {}
+				break;
+			case MoveDirection.Up:
+				while (MakeOneMoveDownIndex(columns[i])) {}
+				break;
+				*/
+		ResetMergedFlags();
+
 		if(mouseInTile.row == mouseDownStartTile.row){
-			print ("slide row");
+			print ("slide row " +mouseInTile.row +" col: " + mouseDownStartTile.col + " -> " + mouseInTile.col );
 			// slide row
+
+			if(mouseInTile.col < mouseDownStartTile.col){
+				print ("slide Left");
+				// left
+				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {}
+			} else {
+				// right
+//				while (MakeOneMoveUpIndex(rows[i])) {}
+//				break;
+			}
 			return;
 		}
 
 		if(mouseInTile.col == mouseDownStartTile.col){
-			print ("slide col");
+			print ("slide col " +mouseInTile.col +" row: " + mouseDownStartTile.row + " -> " + mouseInTile.row );
+
 			// slide col
 			return;
 		}

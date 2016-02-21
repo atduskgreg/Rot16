@@ -2,11 +2,15 @@
 using System.Collections;
 using System.Collections.Generic;
 
+
 public class Tile : MonoBehaviour {
+	public static int EmptyTileId = 16;
+
 	public int tileId;
 	public int[] allowedStartingTiles;
 	public int row;
 	public int col;
+	public bool mergedThisTurn = false;
 	
 	BoardManager boardManager;
 
@@ -46,16 +50,26 @@ public class Tile : MonoBehaviour {
 			{15,12}
 		};
 
-		setTileId (rotDict[tileId]);
+		if(!isEmpty()){
+			setTileId (rotDict[tileId]);
+		}
 	}
 
-	public bool canCombineWith(Tile tile){
-
-
-		return false;
+	public bool CanCombineWith(Tile tile){
+		string combineKey = tileId + "+" + tile.tileId;
+		return combinationRules.ContainsKey(combineKey);
 	}
 
-	void setTileId(int newTileId){
+	public void CombineWith(Tile tile){
+		string combineKey = tileId + "+" + tile.tileId;
+		setTileId(combinationRules[combineKey]);
+	}
+
+	public bool isEmpty(){
+		return tileId == Tile.EmptyTileId;
+	}
+
+	public void setTileId(int newTileId){
 		tileId = newTileId;
 		Sprite[] sprites =  Resources.LoadAll<Sprite>("pieces");
 		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
