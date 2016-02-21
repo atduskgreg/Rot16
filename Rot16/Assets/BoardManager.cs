@@ -71,6 +71,30 @@ public class BoardManager : MonoBehaviour {
 		return false;
 	}
 
+	bool MakeOneMoveUpIndex(Tile[] LineOfTiles)
+	{
+		for (int i =LineOfTiles.Length-1; i > 0; i--) {
+			//MOVE BLOCK 
+			if (LineOfTiles[i].isEmpty() && !LineOfTiles[i-1].isEmpty ()){
+
+				LineOfTiles[i].setTileId(LineOfTiles[i-1].tileId);
+				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
+				return true;
+			}
+			// MERGE BLOCK
+			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i-1]) &&
+			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i-1].mergedThisTurn == false)
+			{
+				LineOfTiles[i].CombineWith(LineOfTiles[i-1]);
+				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
+				LineOfTiles[i].mergedThisTurn = true;
+				return true;
+			}
+		}
+		return false;
+	}
+
+
 	private void ResetMergedFlags(){
 		foreach (Tile t in AllTiles){
 			t.mergedThisTurn = false;
@@ -119,7 +143,7 @@ public class BoardManager : MonoBehaviour {
 				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {}
 			} else {
 				// right
-//				while (MakeOneMoveUpIndex(rows[i])) {}
+				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {}
 //				break;
 			}
 			return;
@@ -127,8 +151,16 @@ public class BoardManager : MonoBehaviour {
 
 		if(mouseInTile.col == mouseDownStartTile.col){
 			print ("slide col " +mouseInTile.col +" row: " + mouseDownStartTile.row + " -> " + mouseInTile.row );
-
 			// slide col
+
+			if(mouseInTile.row < mouseDownStartTile.row){
+				print ("slide up");
+				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {}
+
+			} else {
+				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {}
+
+			}
 			return;
 		}
 
