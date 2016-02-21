@@ -2,12 +2,12 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class TileChoice : MonoBehaviour {
+public class Tile : MonoBehaviour {
 	public int tileId;
 	public int[] allowedStartingTiles;
-
-	int id;
-
+	public int row;
+	public int col;
+	
 	BoardManager boardManager;
 
 	public static Dictionary<string, int> combinationRules = new Dictionary< string, int>(){
@@ -49,7 +49,7 @@ public class TileChoice : MonoBehaviour {
 		setTileId (rotDict[tileId]);
 	}
 
-	public bool canCombineWith(TileChoice tile){
+	public bool canCombineWith(Tile tile){
 
 
 		return false;
@@ -61,13 +61,6 @@ public class TileChoice : MonoBehaviour {
 		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
 	}
 
-	public void SetId(int i){
-		id = i;
-	}
-
-	public int GetId(){
-		return id;
-	}
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
 		assignStartingTile();
@@ -79,12 +72,11 @@ public class TileChoice : MonoBehaviour {
 	
 
 	void OnMouseEnter(){
-		boardManager.MouseInTile(gameObject);
+		boardManager.MouseInTile(GetComponent<Tile>());
 	}
  
 	void OnMouseDown(){
-		print ("down: " + id + " tileId " + tileId);
-		boardManager.MouseDownInTile(gameObject);
+		boardManager.MouseDownInTile(GetComponent<Tile>());
 	}
 	
 	void OnMouseUp(){
