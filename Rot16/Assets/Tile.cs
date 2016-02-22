@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Tile : MonoBehaviour {
 	public static int EmptyTileId = 16;
 
-	public int tileId;
+	public int tileId = 16;
 	public int[] allowedStartingTiles;
 	public int row;
 	public int col;
@@ -102,13 +102,17 @@ public class Tile : MonoBehaviour {
 
 	public void setTileId(int newTileId){
 		tileId = newTileId;
+		updateSprite();
+	}
+
+	void updateSprite(){
 		Sprite[] sprites =  Resources.LoadAll<Sprite>("pieces");
 		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
 	}
 
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
-		assignStartingTile();
+		updateSprite();
 	}
 	
 	void Update () {

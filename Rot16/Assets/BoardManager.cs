@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 
 public class BoardManager : MonoBehaviour {
+	public int numStartingTiles = 2;
+
 	public GameObject tilePrefab;
 
 	private Tile[,] AllTiles = new Tile[4,4];
@@ -27,6 +29,19 @@ public class BoardManager : MonoBehaviour {
 				tile.row = row;
 				tile.col = col;
 				AllTiles[row, col] = tile;
+			}
+		}
+
+		List<int> placedTileIndices = new List<int>();
+		while(placedTileIndices.Count < numStartingTiles){
+			int idx = Random.Range (0, AllTiles.Length-1);
+			if(!placedTileIndices.Contains(idx)){
+
+				int row = idx / 4;
+				int col = idx % 4;
+
+				AllTiles[row,col].assignStartingTile();
+				placedTileIndices.Add(idx);
 			}
 		}
 
