@@ -44,7 +44,6 @@ public class BoardManager : MonoBehaviour {
 	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
 		for (int i =0; i< LineOfTiles.Length-1; i++) 
 		{
-			print (i);
 			//MOVE BLOCK 
 			// move into empty spaces.
 			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i+1].isEmpty()){
@@ -118,8 +117,18 @@ public class BoardManager : MonoBehaviour {
 
 			if(mouseInTile.col < mouseDownStartTile.col){
 				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {}
+
+				print ("move down row");
+				int lastIndex = rows[mouseInTile.row].Length - 1;
+				rows[mouseInTile.row][lastIndex].assignStartingTile();
+
+
 			} else {
 				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {}
+				print ("move up row");
+				rows[mouseInTile.row][0].assignStartingTile();
+
+
 			}
 			return;
 		}
@@ -129,9 +138,16 @@ public class BoardManager : MonoBehaviour {
 
 			if(mouseInTile.row < mouseDownStartTile.row){
 				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {}
+				print ("move down col");
+				int lastIndex = columns[mouseInTile.col].Length - 1;
+				columns[mouseInTile.col][lastIndex].assignStartingTile();
+
 
 			} else {
 				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {}
+				print ("move up col");
+				columns[mouseInTile.col][0].assignStartingTile();
+
 
 			}
 			return;
