@@ -32,6 +32,7 @@ public class BoardManager : MonoBehaviour {
 			}
 		}
 
+
 		List<int> placedTileIndices = new List<int>();
 		while(placedTileIndices.Count < numStartingTiles){
 			int idx = Random.Range (0, AllTiles.Length-1);
@@ -41,9 +42,14 @@ public class BoardManager : MonoBehaviour {
 				int col = idx % 4;
 
 				AllTiles[row,col].assignStartingTile();
+
 				placedTileIndices.Add(idx);
 			}
 		}
+
+		
+		PathFinder pathFinder = new PathFinder();
+		pathFinder.LoadTileSet(AllTiles);
 
 		columns.Add (new Tile[]{AllTiles [0, 0], AllTiles [1, 0], AllTiles [2, 0], AllTiles [3, 0]});
 		columns.Add (new Tile[]{AllTiles [0, 1], AllTiles [1, 1], AllTiles [2, 1], AllTiles [3, 1]});
