@@ -131,18 +131,28 @@ public class BoardManager : MonoBehaviour {
 			print ("slide row " +mouseInTile.row +" col: " + mouseDownStartTile.col + " -> " + mouseInTile.col );
 
 			if(mouseInTile.col < mouseDownStartTile.col){
-				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {}
+				bool moveMade = false;
+				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {
+					moveMade = true;
+				}
 
-				print ("move down row");
-				int lastIndex = rows[mouseInTile.row].Length - 1;
-				rows[mouseInTile.row][lastIndex].assignStartingTile();
+				if(moveMade){
+					print ("move down row");
+					int lastIndex = rows[mouseInTile.row].Length - 1;
+					rows[mouseInTile.row][lastIndex].assignStartingTile();
+				}
 
 
 			} else {
-				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {}
-				print ("move up row");
-				rows[mouseInTile.row][0].assignStartingTile();
+				bool moveMade = false;
+				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {
+					moveMade = true;
+				}
 
+				if(moveMade){
+					print ("move up row");
+					rows[mouseInTile.row][0].assignStartingTile();
+				}
 
 			}
 			return;
@@ -152,17 +162,25 @@ public class BoardManager : MonoBehaviour {
 			print ("slide col " +mouseInTile.col +" row: " + mouseDownStartTile.row + " -> " + mouseInTile.row );
 
 			if(mouseInTile.row < mouseDownStartTile.row){
-				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {}
-				print ("move down col");
-				int lastIndex = columns[mouseInTile.col].Length - 1;
-				columns[mouseInTile.col][lastIndex].assignStartingTile();
-
+				bool moveMade = false;
+				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					print ("move down col");
+					int lastIndex = columns[mouseInTile.col].Length - 1;
+					columns[mouseInTile.col][lastIndex].assignStartingTile();
+				}
 
 			} else {
-				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {}
-				print ("move up col");
-				columns[mouseInTile.col][0].assignStartingTile();
-
+				bool moveMade = false;
+				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					print ("move up col");
+					columns[mouseInTile.col][0].assignStartingTile();
+				}
 
 			}
 			return;
