@@ -86,6 +86,12 @@ public class Tile : MonoBehaviour {
 		}
 	}
 
+	// if this is not an empty tile
+	// it can move into the place of empty tiles
+	public bool CanMoveInto(Tile tile){
+		return (tileId != Tile.EmptyTileId) && (tile.tileId == Tile.EmptyTileId);
+	}
+
 	public bool CanCombineWith(Tile tile){
 		string combineKey = tileId + "+" + tile.tileId;
 		return combinationRules.ContainsKey(combineKey);

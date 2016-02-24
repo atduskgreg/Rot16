@@ -7,6 +7,7 @@ public class BoardManager : MonoBehaviour {
 	public int numStartingTiles = 2;
 	public Text HorizontalScoreText;
 	public Text VerticalScoreText;
+	public Text VictoryText;
 
 
 	public GameObject tilePrefab;
@@ -15,6 +16,9 @@ public class BoardManager : MonoBehaviour {
 	public Tile[,] AllTiles = new Tile[4,4];
 	private List <Tile[]> columns = new List<Tile[]> ();
 	private List <Tile[]> rows = new List<Tile[]> ();
+
+	private int horizontalScore = 0;
+	private int verticalScore = 0;
 
 	int gridWidth = 4;
 	int gridHeight = 4;
@@ -27,8 +31,11 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	void UpdateScoreDisplay(){
-		HorizontalScoreText.text = "" + HorizontalScore();
-		VerticalScoreText.text = "" + VerticalScore();
+		horizontalScore = HorizontalScore();
+		verticalScore = VerticalScore();
+
+		HorizontalScoreText.text = "" + horizontalScore;
+		VerticalScoreText.text = "" + verticalScore;
 	}
 
 	int VerticalScore(){
@@ -104,6 +111,33 @@ public class BoardManager : MonoBehaviour {
 		rows.Add (new Tile[]{AllTiles [3, 0], AllTiles [3, 1], AllTiles [3, 2], AllTiles [3, 3]});
 	}
 
+	bool TilesCanSlide(Tile[] tiles){
+		bool result = false;
+		for(int i = 0; i < tiles.Length-1; i++){
+			Tile here = tiles[i];
+			Tile next = tiles[i+1];
+
+			bool thisResult = here.CanCombineWith(next) || here.CanMoveInto(next);
+			result = result || thisResult;
+		}
+
+
+		return result;
+	}
+
+	bool SlidesAvailable(){
+		bool result = false;
+
+		foreach(Tile[] column in columns){
+			result = result || TilesCanSlide(column);
+		}
+		foreach(Tile[] row in rows){
+			result = result || TilesCanSlide(row);
+		}
+
+		return result;
+	}
+
 	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
 		for (int i =0; i< LineOfTiles.Length-1; i++) 
 		{
@@ -170,9 +204,7 @@ public class BoardManager : MonoBehaviour {
 	public void MouseUp(){
 		if(mouseInTile.row == mouseDownStartTile.row && mouseInTile.col == mouseDownStartTile.col){
 			mouseInTile.GetComponent<Tile>().rotateTile();
-			pathFinder.LoadTileSet(AllTiles);
-			UpdateScoreDisplay();
-
+			BoardStateChanged();
 			return;
 		} 
 
@@ -206,8 +238,7 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
-			pathFinder.LoadTileSet(AllTiles);
-			UpdateScoreDisplay();
+			BoardStateChanged();
 			return;
 		}
 
@@ -236,17 +267,29 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
-			pathFinder.LoadTileSet(AllTiles);
-			UpdateScoreDisplay();
-
+			BoardStateChanged();
 			return;
 		}
 
 		print ("no slide");
 	}
 
+	void BoardStateChanged(){
+		pathFinder.LoadTileSet(AllTiles);
+		UpdateScoreDisplay();
+		print ("can slide? " + SlidesAvailable());
+		if(!SlidesAvailable ()){
+			if(verticalScore > horizontalScore){
+				VictoryText.text = "Vertical\nVictory";
+			}else if(horizontalScore > verticalScore){
+				VictoryText.text = "Horizontal\nVictory";
+			} else {
+				VictoryText.text = "No Victory";
+			}
+		}
+	}
 
 	void Update () {
-	
+		
 	}
 }
