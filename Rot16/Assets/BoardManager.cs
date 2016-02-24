@@ -12,7 +12,7 @@ public class BoardManager : MonoBehaviour {
 	public GameObject tilePrefab;
 	PathFinder pathFinder;
 
-	private Tile[,] AllTiles = new Tile[4,4];
+	public Tile[,] AllTiles = new Tile[4,4];
 	private List <Tile[]> columns = new List<Tile[]> ();
 	private List <Tile[]> rows = new List<Tile[]> ();
 

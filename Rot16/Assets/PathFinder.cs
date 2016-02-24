@@ -4,6 +4,12 @@ using System.Collections.Generic;
 
 
 public class PathFinder : MonoBehaviour {
+	public Vector2 testFrom;
+	public Vector2 testTo;
+
+	public int testTileCol;
+	public int testTileRow;
+
 	private Node[,] nodes = new Node[9,9];
 	private Dictionary<Node, List<Node>> edges = new Dictionary<Node,List<Node>>();
 
@@ -37,7 +43,7 @@ public class PathFinder : MonoBehaviour {
 			result.Add (new[]{new Vector2(1,2), new Vector2(2,1)});
 			break;
 		case 5:
-			result.Add (new[]{new Vector2(0,1), new Vector2(2,1)});
+			result.Add (new[]{new Vector2(1,0), new Vector2(2,1)});
 			break;
 		case 6:
 			result.Add (new[]{new Vector2(0,1), new Vector2(1,0)});
@@ -67,6 +73,10 @@ public class PathFinder : MonoBehaviour {
 	}
 
 	public Path GetPath(Vector2 start, Vector2 end){
+
+//		int tileId = GetComponent<BoardManager>().AllTiles[(int)start.x/2, (int)start.y/2].tileId;
+//		print ("start: " + (int)start.x/2 + "x" + (int)start.y/2 + " tileId " +tileId);
+
 		return GetPath(nodes[(int)start.y,(int)start.x], nodes[(int)end.y, (int)end.x]);
 	}
 
@@ -132,12 +142,14 @@ public class PathFinder : MonoBehaviour {
 	void UpdateEdges(Tile[,] tileSet){
 		for(int row = 0; row <  tileSet.GetLength(0); row++){
 			for(int col = 0; col <  tileSet.GetLength(1); col++){
+
 //				print (col+"x"+row +": " + tileSet[row,col].tileId);
 				List<Vector2[]> nodeConnections = PathFinder.ConnectedNodesForTileId(tileSet[row,col].tileId);
 				for(int i = 0; i < nodeConnections.Count; i++){
+
 					int fromNodeCol = (int)nodeConnections[i][0].x + col *2;
 					int fromNodeRow = (int)nodeConnections[i][0].y + row *2;
-					
+
 					int toNodeCol = (int)nodeConnections[i][1].x + col *2;
 					int toNodeRow = (int)nodeConnections[i][1].y + row *2;
 					AddEdgeForNodes(nodes[fromNodeRow, fromNodeCol], nodes[toNodeRow, toNodeCol]);
@@ -153,6 +165,29 @@ public class PathFinder : MonoBehaviour {
 			edges[node1] = new List<Node>();
 		}
 		edges[node1].Add(node2);
+	}
+
+	void Update(){
+		if(Input.GetKeyDown(KeyCode.Space)){
+			Tile testTile = GetComponent<BoardManager>().AllTiles[testTileRow, testTileCol];
+			print ("testTile id: "+ testTile.tileId);
+			List<Vector2[]> localEdges = ConnectedNodesForTileId(testTile.tileId);
+			foreach(Vector2[] edge in localEdges){
+				print(edge[0].x +"x" + edge[0].y + " -> " + edge[1].x +"x" + edge[1].y);
+			}
+//			Tile fromTile = GetComponent<BoardManager>().AllTiles[(int)testFrom.x/2, (int)testFrom.y/2];
+//			Tile toTile = GetComponent<BoardManager>().AllTiles[(int)testTo.x/2, (int)testTo.y/2];
+
+//			print("fromTile id: " + fromTile.tileId + " toTile id: " + toTile.tileId);
+//			ConnectedNodesForTileId()
+
+			Path testResult = GetPath(testFrom, testTo);
+			print("path exists? " + testResult.Exists);
+			foreach(Node node in testResult.nodes){
+				print (node.col +"x"+ node.row);
+			}
+
+		}
 	}
 }
 
