@@ -7,6 +7,7 @@ public class BoardManager : MonoBehaviour {
 	public int numStartingTiles = 2;
 
 	public GameObject tilePrefab;
+	PathFinder pathFinder;
 
 	private Tile[,] AllTiles = new Tile[4,4];
 	private List <Tile[]> columns = new List<Tile[]> ();
@@ -18,6 +19,8 @@ public class BoardManager : MonoBehaviour {
 
 	void Start () {
 		PopulateTiles();
+		pathFinder = GetComponent<PathFinder>();
+		pathFinder.LoadTileSet(AllTiles);
 	}
 
 	void PopulateTiles(){
@@ -46,10 +49,6 @@ public class BoardManager : MonoBehaviour {
 				placedTileIndices.Add(idx);
 			}
 		}
-
-		
-		PathFinder pathFinder = new PathFinder();
-		pathFinder.LoadTileSet(AllTiles);
 
 		columns.Add (new Tile[]{AllTiles [0, 0], AllTiles [1, 0], AllTiles [2, 0], AllTiles [3, 0]});
 		columns.Add (new Tile[]{AllTiles [0, 1], AllTiles [1, 1], AllTiles [2, 1], AllTiles [3, 1]});
@@ -128,6 +127,7 @@ public class BoardManager : MonoBehaviour {
 	public void MouseUp(){
 		if(mouseInTile.row == mouseDownStartTile.row && mouseInTile.col == mouseDownStartTile.col){
 			mouseInTile.GetComponent<Tile>().rotateTile();
+			pathFinder.LoadTileSet(AllTiles);
 			return;
 		} 
 
@@ -161,6 +161,7 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
+			pathFinder.LoadTileSet(AllTiles);
 			return;
 		}
 
@@ -189,6 +190,7 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
+			pathFinder.LoadTileSet(AllTiles);
 			return;
 		}
 

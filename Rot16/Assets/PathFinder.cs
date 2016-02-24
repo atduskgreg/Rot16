@@ -10,12 +10,12 @@ public class PathFinder : MonoBehaviour {
 	// Get the list of nodes connected by any given tileId
 	// The coordinates are in local tile space
 	// All of these are assumed to be two-directional
-	List<Vector2[]> ConnectedNodesForTileId(int tileId){
+	public static List<Vector2[]> ConnectedNodesForTileId(int tileId){
 		List<Vector2[]> result = new List<Vector2[]>();
 		switch(tileId){
 		case 0:
-			result.Add (new[]{new Vector2(1,0), new Vector2(1,1)});
-			result.Add (new[]{new Vector2(1,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(0,1), new Vector2(1,1)});
+			result.Add (new[]{new Vector2(1,1), new Vector2(2,1)});
 			break;
 		case 1:
 			result.Add (new[]{new Vector2(1,0), new Vector2(1,1)});
@@ -23,42 +23,42 @@ public class PathFinder : MonoBehaviour {
 			break;
 		case 2:
 			result.Add (new[]{new Vector2(1,0), new Vector2(1,1)});
-			result.Add (new[]{new Vector2(1,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(1,2), new Vector2(1,1)});
 			result.Add (new[]{new Vector2(0,0), new Vector2(1,1)});
-			result.Add (new[]{new Vector2(1,1), new Vector2(2,1)});
+			result.Add (new[]{new Vector2(2,1), new Vector2(1,1)});
 			break;
 		case 3:
-			result.Add (new[]{new Vector2(1,0), new Vector2(2,1)});
-			result.Add (new[]{new Vector2(2,1), new Vector2(1,2)});
-			result.Add (new[]{new Vector2(1,2), new Vector2(0,1)});
-			result.Add (new[]{new Vector2(0,1), new Vector2(1,0)});
+			result.Add (new[]{new Vector2(0,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(1,2), new Vector2(2,1)});
+			result.Add (new[]{new Vector2(2,1), new Vector2(1,0)});
+			result.Add (new[]{new Vector2(1,0), new Vector2(0,1)});
 			break;
 		case 4:
-			result.Add (new[]{new Vector2(2,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(1,2), new Vector2(2,1)});
 			break;
 		case 5:
-			result.Add (new[]{new Vector2(0,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(0,1), new Vector2(2,1)});
 			break;
 		case 6:
 			result.Add (new[]{new Vector2(0,1), new Vector2(1,0)});
 			break;
 		case 7:
-			result.Add (new[]{new Vector2(1,0), new Vector2(2,1)});
-			break;
-		case 8:
-			result.Add (new[]{new Vector2(1,0), new Vector2(2,1)});
-			result.Add (new[]{new Vector2(2,1), new Vector2(1,2)});
-			break;
-		case 9:
-			result.Add (new[]{new Vector2(2,1), new Vector2(1,2)});
-			result.Add (new[]{new Vector2(1,2), new Vector2(0,1)});
-			break;
-		case 10:
-			result.Add (new[]{new Vector2(1,0), new Vector2(0,1)});
 			result.Add (new[]{new Vector2(0,1), new Vector2(1,2)});
 			break;
-		case 11:
+		case 8:
+			result.Add (new[]{new Vector2(0,1), new Vector2(1,2)});
+			result.Add (new[]{new Vector2(1,2), new Vector2(2,1)});
+			break;
+		case 9:
+			result.Add (new[]{new Vector2(1,2), new Vector2(2,1)});
+			result.Add (new[]{new Vector2(2,1), new Vector2(1,0)});
+			break;
+		case 10:
+			result.Add (new[]{new Vector2(0,1), new Vector2(1,0)});
 			result.Add (new[]{new Vector2(1,0), new Vector2(2,1)});
+			break;
+		case 11:
+			result.Add (new[]{new Vector2(1,2), new Vector2(0,1)});
 			result.Add (new[]{new Vector2(0,1), new Vector2(1,0)});
 			break;
 		}
@@ -66,7 +66,59 @@ public class PathFinder : MonoBehaviour {
 		return result;
 	}
 
-	
+	public int CheckScore(){
+		Path path = GetPath(nodes[0,1], nodes[8,1]);
+		if(path.Exists){
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
+	public Path GetPath(Node start, Node end){
+
+
+		// breadth first search
+		Dictionary<Node, Node> cameFrom = new Dictionary<Node, Node>();
+		Queue<Node> frontier = new Queue<Node>();
+		frontier.Enqueue(start);
+
+		while(frontier.Count > 0){
+			Node current = frontier.Dequeue();
+
+			if(edges.ContainsKey(current)){
+				foreach(Node neighbor in edges[current]){
+					if(!cameFrom.ContainsKey(neighbor)){
+						frontier.Enqueue(neighbor);
+						cameFrom[neighbor] = current;
+					}
+				}
+			}
+		}
+
+
+		Path result = new Path();
+
+
+		Node step = end;
+		result.nodes.Add(step);
+
+		print ("cameFrom.ContainsKey(step): " + cameFrom.ContainsKey(step));
+
+		while(cameFrom.ContainsKey(step) && step != start){
+			step = cameFrom[step];
+			result.nodes.Add(step);
+
+			if(step == start){
+				result.Exists = true;
+			}
+		}
+
+		result.nodes.Reverse();
+
+		return result;
+	}
+
 	public void LoadTileSet(Tile[,] tileSet){
 
 		// 3x3 grid within each tile with shared
@@ -77,25 +129,31 @@ public class PathFinder : MonoBehaviour {
 		for(int row = 0; row < gridHeight; row++){
 			for(int col = 0; col < gridWidth; col++){
 				nodes[row,col] = new Node(row,col);
-		
 			}
 		}
 
+		UpdateEdges(tileSet);
+
+	}
+
+	void UpdateEdges(Tile[,] tileSet){
 		for(int row = 0; row <  tileSet.GetLength(0); row++){
 			for(int col = 0; col <  tileSet.GetLength(1); col++){
-				List<Vector2[]> nodeConnections = ConnectedNodesForTileId(tileSet[row,col].tileId);
+//				print (col+"x"+row +": " + tileSet[row,col].tileId);
+				List<Vector2[]> nodeConnections = PathFinder.ConnectedNodesForTileId(tileSet[row,col].tileId);
 				for(int i = 0; i < nodeConnections.Count; i++){
 					int fromNodeCol = (int)nodeConnections[i][0].x + col *2;
 					int fromNodeRow = (int)nodeConnections[i][0].y + row *2;
-
+					
 					int toNodeCol = (int)nodeConnections[i][1].x + col *2;
 					int toNodeRow = (int)nodeConnections[i][1].y + row *2;
 					AddEdgeForNodes(nodes[fromNodeRow, fromNodeCol], nodes[toNodeRow, toNodeCol]);
 					AddEdgeForNodes(nodes[toNodeRow, toNodeCol], nodes[fromNodeRow, fromNodeCol]);
-
+					
 				}
 			}
 		}
+		CheckScore();
 	}
 
 	void AddEdgeForNodes(Node node1, Node node2){
@@ -103,24 +161,18 @@ public class PathFinder : MonoBehaviour {
 			edges[node1] = new List<Node>();
 		}
 		edges[node1].Add(node2);
-		print ("edge from: " + node1.row +"x" + node1.col + " to " + node2.row + "x" + node2.col);
+	}
+}
+
+public class Path {
+	public bool Exists;
+	public List<Node> nodes;
+
+	public Path(){
+		Exists = false;
+		nodes = new List<Node>();
 	}
 
-
-//	List<Node> GetNeighbors(Node node){
-//		int row = node.row;
-//		int col = node.col;
-//		List<Node> result = new List<Node>();
-//
-//	}
-
-	void Start () {
-	
-	}
-	
-	void Update () {
-	
-	}
 }
 
 public class Node {
