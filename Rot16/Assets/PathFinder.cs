@@ -24,7 +24,7 @@ public class PathFinder : MonoBehaviour {
 		case 2:
 			result.Add (new[]{new Vector2(1,0), new Vector2(1,1)});
 			result.Add (new[]{new Vector2(1,2), new Vector2(1,1)});
-			result.Add (new[]{new Vector2(0,0), new Vector2(1,1)});
+			result.Add (new[]{new Vector2(0,1), new Vector2(1,1)});
 			result.Add (new[]{new Vector2(2,1), new Vector2(1,1)});
 			break;
 		case 3:
@@ -66,18 +66,12 @@ public class PathFinder : MonoBehaviour {
 		return result;
 	}
 
-	public int CheckScore(){
-		Path path = GetPath(nodes[0,1], nodes[8,1]);
-		if(path.Exists){
-			return 1;
-		} else {
-			return 0;
-		}
+	public Path GetPath(Vector2 start, Vector2 end){
+		return GetPath(nodes[(int)start.y,(int)start.x], nodes[(int)end.y, (int)end.x]);
 	}
 
-	public Path GetPath(Node start, Node end){
 
-
+	private Path GetPath(Node start, Node end){
 		// breadth first search
 		Dictionary<Node, Node> cameFrom = new Dictionary<Node, Node>();
 		Queue<Node> frontier = new Queue<Node>();
@@ -103,7 +97,6 @@ public class PathFinder : MonoBehaviour {
 		Node step = end;
 		result.nodes.Add(step);
 
-		print ("cameFrom.ContainsKey(step): " + cameFrom.ContainsKey(step));
 
 		while(cameFrom.ContainsKey(step) && step != start){
 			step = cameFrom[step];
@@ -153,7 +146,6 @@ public class PathFinder : MonoBehaviour {
 				}
 			}
 		}
-		CheckScore();
 	}
 
 	void AddEdgeForNodes(Node node1, Node node2){

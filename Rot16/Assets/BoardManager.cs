@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour {
 	public int numStartingTiles = 2;
+	public Text HorizontalScoreText;
+	public Text VerticalScoreText;
+
 
 	public GameObject tilePrefab;
 	PathFinder pathFinder;
@@ -23,6 +26,47 @@ public class BoardManager : MonoBehaviour {
 		pathFinder.LoadTileSet(AllTiles);
 	}
 
+	void UpdateScoreDisplay(){
+		HorizontalScoreText.text = "" + HorizontalScore();
+		VerticalScoreText.text = "" + VerticalScore();
+	}
+
+	int VerticalScore(){
+		int score = 0;
+
+		Vector2[] startPoints = {new Vector2(1,0), new Vector2(3,0), new Vector2(5,0), new Vector2(7,0)};
+		Vector2[] endPoints = {new Vector2(1,8), new Vector2(3,8), new Vector2(5,8), new Vector2(7,8)};
+
+		for(int i = 0; i < startPoints.Length; i++){
+			for(int j = 0; j < endPoints.Length; j++){
+				if(pathFinder.GetPath(startPoints[i], endPoints[j]).Exists){
+					score++;
+				}
+			}
+		}
+
+		return score;
+	}
+
+	int HorizontalScore(){
+		int score = 0;
+		
+		Vector2[] startPoints = {new Vector2(0,1), new Vector2(0,3), new Vector2(0,5), new Vector2(0,7)};
+		Vector2[] endPoints = {new Vector2(8,1), new Vector2(8,3), new Vector2(8,5), new Vector2(8,7)};
+		
+		for(int i = 0; i < startPoints.Length; i++){
+			for(int j = 0; j < endPoints.Length; j++){
+				if(pathFinder.GetPath(startPoints[i], endPoints[j]).Exists){
+					score++;
+				}
+			}
+		}
+		
+		return score;
+	}
+
+
+
 	void PopulateTiles(){
 		for (int col = 0; col < gridWidth; col++) {
 			for (int row = 0; row < gridHeight; row++) {
@@ -34,7 +78,6 @@ public class BoardManager : MonoBehaviour {
 				AllTiles[row, col] = tile;
 			}
 		}
-
 
 		List<int> placedTileIndices = new List<int>();
 		while(placedTileIndices.Count < numStartingTiles){
@@ -128,6 +171,8 @@ public class BoardManager : MonoBehaviour {
 		if(mouseInTile.row == mouseDownStartTile.row && mouseInTile.col == mouseDownStartTile.col){
 			mouseInTile.GetComponent<Tile>().rotateTile();
 			pathFinder.LoadTileSet(AllTiles);
+			UpdateScoreDisplay();
+
 			return;
 		} 
 
@@ -162,6 +207,7 @@ public class BoardManager : MonoBehaviour {
 
 			}
 			pathFinder.LoadTileSet(AllTiles);
+			UpdateScoreDisplay();
 			return;
 		}
 
@@ -191,6 +237,8 @@ public class BoardManager : MonoBehaviour {
 
 			}
 			pathFinder.LoadTileSet(AllTiles);
+			UpdateScoreDisplay();
+
 			return;
 		}
 
