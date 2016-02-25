@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using Vectrosity;
 
 public class BoardManager : MonoBehaviour {
 	public int numStartingTiles = 2;
@@ -9,6 +10,13 @@ public class BoardManager : MonoBehaviour {
 	public Text VerticalScoreText;
 	public Text VictoryText;
 
+
+	public Material VerticalLineMaterial;
+	public Material HorizontalLineMaterial;
+
+	List<Path> VerticalPaths = new List<Path>();
+	List<Path> HorizontalPaths = new List<Path>(); 
+	List<VectorLine> scoreLines = new List<VectorLine>();
 
 	public GameObject tilePrefab;
 	PathFinder pathFinder;
@@ -38,16 +46,21 @@ public class BoardManager : MonoBehaviour {
 		VerticalScoreText.text = "" + verticalScore;
 	}
 
+	// TODO: capture scoring paths and draw them using the lineRenderers
+
 	int VerticalScore(){
 		int score = 0;
+		VerticalPaths.Clear();
 
 		Vector2[] startPoints = {new Vector2(1,0), new Vector2(3,0), new Vector2(5,0), new Vector2(7,0)};
 		Vector2[] endPoints = {new Vector2(1,8), new Vector2(3,8), new Vector2(5,8), new Vector2(7,8)};
 
 		for(int i = 0; i < startPoints.Length; i++){
 			for(int j = 0; j < endPoints.Length; j++){
-				if(pathFinder.GetPath(startPoints[i], endPoints[j]).Exists){
+				Path verticalPath = pathFinder.GetPath(startPoints[i], endPoints[j]);
+				if(verticalPath.Exists){
 					score++;
+					VerticalPaths.Add(verticalPath);
 				}
 			}
 		}
@@ -57,14 +70,17 @@ public class BoardManager : MonoBehaviour {
 
 	int HorizontalScore(){
 		int score = 0;
-		
+		HorizontalPaths.Clear ();
+
 		Vector2[] startPoints = {new Vector2(0,1), new Vector2(0,3), new Vector2(0,5), new Vector2(0,7)};
 		Vector2[] endPoints = {new Vector2(8,1), new Vector2(8,3), new Vector2(8,5), new Vector2(8,7)};
 		
 		for(int i = 0; i < startPoints.Length; i++){
 			for(int j = 0; j < endPoints.Length; j++){
-				if(pathFinder.GetPath(startPoints[i], endPoints[j]).Exists){
+				Path horizontalPath =  pathFinder.GetPath(startPoints[i], endPoints[j]);
+				if(horizontalPath.Exists){
 					score++;
+					HorizontalPaths.Add(horizontalPath);
 				}
 			}
 		}
@@ -211,7 +227,6 @@ public class BoardManager : MonoBehaviour {
 		ResetMergedFlags();
 
 		if(mouseInTile.row == mouseDownStartTile.row){
-			print ("slide row " +mouseInTile.row +" col: " + mouseDownStartTile.col + " -> " + mouseInTile.col );
 
 			if(mouseInTile.col < mouseDownStartTile.col){
 				bool moveMade = false;
@@ -220,7 +235,6 @@ public class BoardManager : MonoBehaviour {
 				}
 
 				if(moveMade){
-					print ("move down row");
 					int lastIndex = rows[mouseInTile.row].Length - 1;
 					rows[mouseInTile.row][lastIndex].assignStartingTile();
 				}
@@ -233,7 +247,6 @@ public class BoardManager : MonoBehaviour {
 				}
 
 				if(moveMade){
-					print ("move up row");
 					rows[mouseInTile.row][0].assignStartingTile();
 				}
 
@@ -243,7 +256,6 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		if(mouseInTile.col == mouseDownStartTile.col){
-			print ("slide col " +mouseInTile.col +" row: " + mouseDownStartTile.row + " -> " + mouseInTile.row );
 
 			if(mouseInTile.row < mouseDownStartTile.row){
 				bool moveMade = false;
@@ -251,7 +263,6 @@ public class BoardManager : MonoBehaviour {
 					moveMade = true;
 				}
 				if(moveMade){
-					print ("move down col");
 					int lastIndex = columns[mouseInTile.col].Length - 1;
 					columns[mouseInTile.col][lastIndex].assignStartingTile();
 				}
@@ -262,7 +273,6 @@ public class BoardManager : MonoBehaviour {
 					moveMade = true;
 				}
 				if(moveMade){
-					print ("move up col");
 					columns[mouseInTile.col][0].assignStartingTile();
 				}
 
@@ -274,10 +284,36 @@ public class BoardManager : MonoBehaviour {
 		print ("no slide");
 	}
 
+	void DrawPath(List<Path> paths, Material material){
+		foreach(Path path in paths){
+			List<Vector3> linePoints = new List<Vector3>();
+
+			foreach(Node node in path.nodes){
+				linePoints.Add(new Vector3((node.col-1) * spriteSize, (node.row-1) * spriteSize, -1));
+			}
+
+			VectorLine pathLine = new VectorLine("ScoreLine", linePoints, material, 5, LineType.Continuous, Joins.Weld);
+			pathLine.Draw();
+			scoreLines.Add(pathLine);
+		}
+	}
+
 	void BoardStateChanged(){
 		pathFinder.LoadTileSet(AllTiles);
 		UpdateScoreDisplay();
-		print ("can slide? " + SlidesAvailable());
+
+//		foreach(VectorLine vl in scoreLines){
+//			VectorLine.Destroy(vl);
+//		}
+
+		VectorLine.Destroy(scoreLines);
+		scoreLines.Clear();
+
+
+		DrawPath(VerticalPaths, VerticalLineMaterial);
+		DrawPath(HorizontalPaths, HorizontalLineMaterial);
+
+		
 		if(!SlidesAvailable ()){
 			if(verticalScore > horizontalScore){
 				VictoryText.text = "Vertical\nVictory";
@@ -290,6 +326,5 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	void Update () {
-		
 	}
 }

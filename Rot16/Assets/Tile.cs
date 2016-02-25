@@ -131,9 +131,6 @@ public class Tile : MonoBehaviour {
 	}
  
 	void OnMouseDown(){
-		print ("tileId: " + GetComponent<Tile>().tileId);
-
-
 
 		boardManager.MouseDownInTile(GetComponent<Tile>());
 
@@ -144,7 +141,6 @@ public class Tile : MonoBehaviour {
 			
 			int toNodeCol = (int)nodeConnections[i][1].x + col *2;
 			int toNodeRow = (int)nodeConnections[i][1].y + row *2;
-			print (fromNodeCol+"x"+fromNodeRow + " -> " + toNodeCol + "x" +toNodeRow);
 		}
 	}
 	
