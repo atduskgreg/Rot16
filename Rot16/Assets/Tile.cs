@@ -131,17 +131,7 @@ public class Tile : MonoBehaviour {
 	}
  
 	void OnMouseDown(){
-
 		boardManager.MouseDownInTile(GetComponent<Tile>());
-
-		List<Vector2[]> nodeConnections = PathFinder.ConnectedNodesForTileId(tileId);
-		for(int i = 0; i < nodeConnections.Count; i++){
-			int fromNodeCol = (int)nodeConnections[i][0].x + col *2;
-			int fromNodeRow = (int)nodeConnections[i][0].y + row *2;
-			
-			int toNodeCol = (int)nodeConnections[i][1].x + col *2;
-			int toNodeRow = (int)nodeConnections[i][1].y + row *2;
-		}
 	}
 	
 	void OnMouseUp(){

@@ -9,7 +9,7 @@ public class BoardManager : MonoBehaviour {
 	public Text HorizontalScoreText;
 	public Text VerticalScoreText;
 	public Text VictoryText;
-
+	public Tile NextTile;
 
 	public Material VerticalLineMaterial;
 	public Material HorizontalLineMaterial;
@@ -36,6 +36,7 @@ public class BoardManager : MonoBehaviour {
 		PopulateTiles();
 		pathFinder = GetComponent<PathFinder>();
 		pathFinder.LoadTileSet(AllTiles);
+		NextTile.assignStartingTile();
 	}
 
 	void UpdateScoreDisplay(){
@@ -236,7 +237,7 @@ public class BoardManager : MonoBehaviour {
 
 				if(moveMade){
 					int lastIndex = rows[mouseInTile.row].Length - 1;
-					rows[mouseInTile.row][lastIndex].assignStartingTile();
+					AddNextTile(rows[mouseInTile.row], lastIndex);
 				}
 
 
@@ -247,7 +248,8 @@ public class BoardManager : MonoBehaviour {
 				}
 
 				if(moveMade){
-					rows[mouseInTile.row][0].assignStartingTile();
+					AddNextTile(rows[mouseInTile.row], 0);
+
 				}
 
 			}
@@ -264,7 +266,7 @@ public class BoardManager : MonoBehaviour {
 				}
 				if(moveMade){
 					int lastIndex = columns[mouseInTile.col].Length - 1;
-					columns[mouseInTile.col][lastIndex].assignStartingTile();
+					AddNextTile(columns[mouseInTile.col], lastIndex);
 				}
 
 			} else {
@@ -273,7 +275,7 @@ public class BoardManager : MonoBehaviour {
 					moveMade = true;
 				}
 				if(moveMade){
-					columns[mouseInTile.col][0].assignStartingTile();
+					AddNextTile(columns[mouseInTile.col], 0);
 				}
 
 			}
@@ -282,6 +284,11 @@ public class BoardManager : MonoBehaviour {
 		}
 
 		print ("no slide");
+	}
+
+	void AddNextTile(Tile[] rowOrColumn, int index){
+		rowOrColumn[index].setTileId(NextTile.tileId);
+		NextTile.assignStartingTile();
 	}
 
 	void DrawPath(List<Path> paths, Material material){
@@ -301,10 +308,6 @@ public class BoardManager : MonoBehaviour {
 	void BoardStateChanged(){
 		pathFinder.LoadTileSet(AllTiles);
 		UpdateScoreDisplay();
-
-//		foreach(VectorLine vl in scoreLines){
-//			VectorLine.Destroy(vl);
-//		}
 
 		VectorLine.Destroy(scoreLines);
 		scoreLines.Clear();
