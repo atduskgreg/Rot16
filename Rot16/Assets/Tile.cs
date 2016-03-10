@@ -125,6 +125,9 @@ public class Tile : MonoBehaviour {
 		
 	}
 	
+    public bool SameTile(Tile otherTile) {
+        return row == otherTile.row && col == otherTile.col;
+    }
 
 	void OnMouseEnter(){
 		boardManager.MouseInTile(GetComponent<Tile>());
