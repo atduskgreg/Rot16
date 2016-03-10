@@ -14,6 +14,11 @@ public class BoardManager : MonoBehaviour {
 	public Material VerticalLineMaterial;
 	public Material HorizontalLineMaterial;
 
+	public int pathHighlightWeight = 2;
+
+	public int verticalPathOffset = 2;
+	public int horizontalPathOffset = -2;
+
 	List<Path> VerticalPaths = new List<Path>();
 	List<Path> HorizontalPaths = new List<Path>(); 
 	List<VectorLine> scoreLines = new List<VectorLine>();
@@ -295,15 +300,29 @@ public class BoardManager : MonoBehaviour {
 		NextTile.assignStartingTile();
 	}
 
-	void DrawPath(List<Path> paths, Material material){
+	void DrawPath(List<Path> paths, Material material, int pathOffset){
 		foreach(Path path in paths){
 			List<Vector3> linePoints = new List<Vector3>();
 
+//			for(int i = 0; i < path.nodes.Count-1; i+=2){
+//				Vector3 prev = new Vector3((path.nodes[i].col-1) * spriteSize, (path.nodes[i].row-1) * spriteSize, -1);
+//				Vector3 next = new Vector3((path.nodes[i+1].col-1) * spriteSize, (path.nodes[i+1].row-1) * spriteSize, -1);
+//
+//				if(prev.y == next.y){
+//					prev = new Vector3(prev.x + pathOffset, prev.y+pathOffset, prev.z);
+//					next = new Vector3(next.x + pathOffset, next.y+pathOffset, next.z);
+//				}
+//
+//				linePoints.Add(prev);
+//				linePoints.Add(next);
+//
+//			}
+
 			foreach(Node node in path.nodes){
-				linePoints.Add(new Vector3((node.col-1) * spriteSize, (node.row-1) * spriteSize, -1));
+				linePoints.Add(new Vector3((node.col-1) * spriteSize + pathOffset, (node.row-1) * spriteSize - pathOffset, -1));
 			}
 
-			VectorLine pathLine = new VectorLine("ScoreLine", linePoints, material, 5, LineType.Continuous, Joins.Weld);
+			VectorLine pathLine = new VectorLine("ScoreLine", linePoints, material, pathHighlightWeight, LineType.Continuous, Joins.Weld);
 			pathLine.Draw();
 			scoreLines.Add(pathLine);
 		}
@@ -326,8 +345,8 @@ public class BoardManager : MonoBehaviour {
 		scoreLines.Clear();
 
 
-		DrawPath(VerticalPaths, VerticalLineMaterial);
-		DrawPath(HorizontalPaths, HorizontalLineMaterial);
+		DrawPath(VerticalPaths, VerticalLineMaterial, verticalPathOffset);
+		DrawPath(HorizontalPaths, HorizontalLineMaterial, horizontalPathOffset);
 
 		
 		if(!SlidesAvailable ()){
