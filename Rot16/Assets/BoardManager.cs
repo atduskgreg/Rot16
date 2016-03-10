@@ -215,11 +215,16 @@ public class BoardManager : MonoBehaviour {
         }
 	}
 
+	Tile lastRotatedTile;
+
 	public void MouseUp(){
         if (mouseInTile.SameTile(mouseDownStartTile)) {
             if (!mouseLeftTile) {
-                mouseInTile.GetComponent<Tile>().rotateTile();
-                BoardStateChanged();
+				if(!lastRotatedTile || !mouseInTile.SameTile(lastRotatedTile)){
+                	mouseInTile.GetComponent<Tile>().rotateTile();
+                	AfterRotate();
+					lastRotatedTile = mouseInTile;
+				}
             }
 			return;
 		} 
@@ -252,7 +257,7 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
-			BoardStateChanged();
+			AfterSlide();
 			return;
 		}
 
@@ -278,7 +283,7 @@ public class BoardManager : MonoBehaviour {
 				}
 
 			}
-			BoardStateChanged();
+			AfterSlide();
 			return;
 		}
 
