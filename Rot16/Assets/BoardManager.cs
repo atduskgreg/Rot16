@@ -304,8 +304,6 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-<<<<<<< Updated upstream
-=======
 	void AfterRotate(){
 		BoardStateChanged();
 	}
@@ -315,7 +313,6 @@ public class BoardManager : MonoBehaviour {
 		BoardStateChanged();
 	}
 
->>>>>>> Stashed changes
 	void BoardStateChanged(){
 		pathFinder.LoadTileSet(AllTiles);
 		UpdateScoreDisplay();
