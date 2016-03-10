@@ -103,19 +103,10 @@ public class BoardManager : MonoBehaviour {
 			}
 		}
 
-		List<int> placedTileIndices = new List<int>();
-		while(placedTileIndices.Count < numStartingTiles){
-			int idx = Random.Range (0, AllTiles.Length-1);
-			if(!placedTileIndices.Contains(idx)){
-
-				int row = idx / 4;
-				int col = idx % 4;
-
-				AllTiles[row,col].assignStartingTile();
-
-				placedTileIndices.Add(idx);
-			}
-		}
+        AllTiles[1, 1].assignStartingTile();
+        AllTiles[1, 2].assignStartingTile();
+        AllTiles[2, 1].assignStartingTile();
+        AllTiles[2, 2].assignStartingTile();
 
 		columns.Add (new Tile[]{AllTiles [0, 0], AllTiles [1, 0], AllTiles [2, 0], AllTiles [3, 0]});
 		columns.Add (new Tile[]{AllTiles [0, 1], AllTiles [1, 1], AllTiles [2, 1], AllTiles [3, 1]});
