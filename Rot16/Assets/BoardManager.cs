@@ -32,7 +32,9 @@ public class BoardManager : MonoBehaviour {
 	int gridHeight = 4;
 	int spriteSize = 312;
 
-	void Start () {
+    bool mouseLeftTile;
+
+    void Start () {
 		PopulateTiles();
 		pathFinder = GetComponent<PathFinder>();
 		pathFinder.LoadTileSet(AllTiles);
@@ -202,17 +204,23 @@ public class BoardManager : MonoBehaviour {
 	Tile mouseDownStartTile;
 	public void MouseDownInTile(Tile tile){
 		mouseDownStartTile = tile;
+        mouseLeftTile = false;
 	}
 
 	Tile mouseInTile;
 	public void MouseInTile(Tile tile){
 		mouseInTile = tile;
+        if (mouseDownStartTile && !mouseInTile.SameTile(mouseDownStartTile)) {
+            mouseLeftTile = true;
+        }
 	}
 
 	public void MouseUp(){
-		if(mouseInTile.row == mouseDownStartTile.row && mouseInTile.col == mouseDownStartTile.col){
-			mouseInTile.GetComponent<Tile>().rotateTile();
-			BoardStateChanged();
+        if (mouseInTile.SameTile(mouseDownStartTile)) {
+            if (!mouseLeftTile) {
+                mouseInTile.GetComponent<Tile>().rotateTile();
+                BoardStateChanged();
+            }
 			return;
 		} 
 
