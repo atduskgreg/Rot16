@@ -153,6 +153,54 @@ public class BoardManager : MonoBehaviour {
 		return result;
 	}
 
+	bool[] CheckTileCombinationsDownIndex(Tile[] LineOfTiles){
+		bool[] canCombine = new bool[LineOfTiles.Length-1];
+
+		for (int i = 0; i < LineOfTiles.Length-1; i++) {
+			//MOVE BLOCK 
+			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i+1].isEmpty()){
+				canCombine[i] = true;
+			}
+
+			// if the one to our left merged, we can't merge with it
+			else if(i > 0 && canCombine[i-1] == true){
+				canCombine[i] = false;	
+			}
+
+			// MERGE BLOCK
+			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1])){
+				canCombine[i] = true;	
+			}
+		}
+		return canCombine;
+	}
+
+	bool[] CheckTileCombinationsUpIndex(Tile[] LineOfTiles){
+		bool[] canCombine = new bool[LineOfTiles.Length-1];
+		int resultIndex = 0;
+
+		for (int i = LineOfTiles.Length-1; i > 0; i--) {
+			//MOVE BLOCK 
+			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i-1].isEmpty()){
+				canCombine[resultIndex] = true;
+				resultIndex++;
+			}
+			
+			// if the one to our left merged, we can't merge with it
+			else if(resultIndex > 0 && canCombine[resultIndex-1] == true){
+				canCombine[resultIndex] = false;
+				resultIndex++;
+			}
+			
+			// MERGE BLOCK
+			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i-1])){
+				canCombine[resultIndex] = true;
+				resultIndex++;
+			}
+		}
+		return canCombine;
+	}
+
 	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
 		for (int i =0; i< LineOfTiles.Length-1; i++) 
 		{
@@ -207,9 +255,13 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	Tile mouseDownStartTile;
+	bool moveInProgress;
+	Move currentMove;
 	public void MouseDownInTile(Tile tile){
 		mouseDownStartTile = tile;
         mouseLeftTile = false;
+		moveInProgress = true;
+		currentMove = new Move(tile);
 	}
 
 	Tile mouseInTile;
@@ -217,12 +269,36 @@ public class BoardManager : MonoBehaviour {
 		mouseInTile = tile;
         if (mouseDownStartTile && !mouseInTile.SameTile(mouseDownStartTile)) {
             mouseLeftTile = true;
+
+			// figure out if we're dragging the column or the row
+			if(mouseInTile.col == mouseDownStartTile.col){
+				currentMove.tileList = columns[mouseDownStartTile.col];
+
+				// determine direction of move within col
+				if(mouseInTile.row > mouseDownStartTile.row){
+					currentMove.moveIsUpIndex = true;
+				} else {
+					currentMove.moveIsUpIndex = false;
+				}
+			}
+
+			if(mouseInTile.row == mouseDownStartTile.row){
+				currentMove.tileList = rows[mouseDownStartTile.row];
+
+				// determine direction of move within row
+				if(mouseInTile.col > mouseDownStartTile.col){
+					currentMove.moveIsUpIndex = true;
+				} else {
+					currentMove.moveIsUpIndex = false;
+				}
+			}
         }
 	}
 
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
+		moveInProgress = false;
         if (mouseInTile.SameTile(mouseDownStartTile)) {
             if (!mouseLeftTile) {
 				if(!lastRotatedTile || !mouseInTile.SameTile(lastRotatedTile)){
@@ -360,6 +436,41 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+
 	void Update () {
+		if(moveInProgress){
+			float move = Input.GetAxis("Vertical");
+			print ("move: " + move);
+		}
+
+		if(Input.GetKeyDown(KeyCode.Space)){
+			if(mouseInTile){
+				bool[] rowCombinations = CheckTileCombinationsUpIndex(rows[mouseInTile.row]);
+				bool[] colCombinations = CheckTileCombinationsUpIndex(columns[mouseInTile.col]);
+
+
+
+				print ("rowCombinations: ");
+				for(int i = 0; i < rowCombinations.Length; i++){
+					print ("["+i+"] " + rowCombinations[i]);
+				}
+
+				print ("colCombinations: ");
+				for(int i = 0; i < colCombinations.Length; i++){
+					print ("["+i+"] " + colCombinations[i]);
+				}
+
+			}
+		}
+	}
+}
+
+public class Move {
+	Tile startingTile;
+	public Tile[] tileList;
+	public bool moveIsUpIndex;
+
+	public Move(Tile _startingTile){
+		startingTile = _startingTile;
 	}
 }
