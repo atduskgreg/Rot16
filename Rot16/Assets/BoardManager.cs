@@ -160,7 +160,7 @@ public class BoardManager : MonoBehaviour {
 				return true;
 			}
 			// MERGE BLOCK
-			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
+			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
 			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i+1].mergedThisTurn == false){
 
 				LineOfTiles[i].CombineWith(LineOfTiles[i+1]);
