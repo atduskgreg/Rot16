@@ -27,8 +27,8 @@ public class BoardManager : MonoBehaviour {
 	PathFinder pathFinder;
 
 	public Tile[,] AllTiles = new Tile[4,4];
-	private List <Tile[]> columns = new List<Tile[]> ();
-	private List <Tile[]> rows = new List<Tile[]> ();
+	public List <Tile[]> columns = new List<Tile[]> ();
+	public List <Tile[]> rows = new List<Tile[]> ();
 
 	private int horizontalScore = 0;
 	private int verticalScore = 0;
@@ -141,9 +141,13 @@ public class BoardManager : MonoBehaviour {
 
 		foreach(Tile[] column in columns){
 			result = result || TilesCanSlide(column);
+			print ("col " + column[0].col + ": " + result);
+
 		}
 		foreach(Tile[] row in rows){
 			result = result || TilesCanSlide(row);
+			print ("row " + row[0].row + ": " + result);
+
 		}
 
 		return result;
@@ -247,59 +251,27 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-	Tile mouseDownStartTile;
-	bool moveInProgress;
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
-		mouseDownStartTile = tile;
-        mouseLeftTile = false;
-		moveInProgress = true;
 		currentMove = new Move(tile);
 	}
 
-	Tile mouseInTile;
 	public void MouseInTile(Tile tile){
-		mouseInTile = tile;
-        if (mouseDownStartTile && !mouseInTile.SameTile(mouseDownStartTile)) {
-            mouseLeftTile = true;
-
-			// figure out if we're dragging the column or the row
-			if(mouseInTile.col == mouseDownStartTile.col){
-				currentMove.tileList = columns[mouseDownStartTile.col];
-
-				// determine direction of move within col
-				if(mouseInTile.row > mouseDownStartTile.row){
-					currentMove.moveIsUpIndex = true;
-				} else {
-					currentMove.moveIsUpIndex = false;
-				}
-			}
-
-			if(mouseInTile.row == mouseDownStartTile.row){
-				currentMove.tileList = rows[mouseDownStartTile.row];
-
-				// determine direction of move within row
-				if(mouseInTile.col > mouseDownStartTile.col){
-					currentMove.moveIsUpIndex = true;
-				} else {
-					currentMove.moveIsUpIndex = false;
-				}
-			}
-        }
+		if(currentMove != null){
+			currentMove.MoveToTile(tile);
+			currentMove.ComputeMoveDirection(this);
+		}
 	}
 
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
-		moveInProgress = false;
-        if (mouseInTile.SameTile(mouseDownStartTile)) {
-            if (!mouseLeftTile) {
-				if(!lastRotatedTile || !mouseInTile.SameTile(lastRotatedTile)){
-                	mouseInTile.GetComponent<Tile>().rotateTile();
-                	AfterRotate();
-					lastRotatedTile = mouseInTile;
-				}
-            }
+
+        if (currentMove.isClick) {
+			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
+				currentMove.currentTile.GetComponent<Tile>().rotateTile();
+                AfterRotate();
+			}
 			return;
 		} 
 
@@ -307,49 +279,49 @@ public class BoardManager : MonoBehaviour {
 
         bool moveMade = false;
 
-        if (mouseInTile.row == mouseDownStartTile.row){
-			if(mouseInTile.col < mouseDownStartTile.col){
-				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {
+		if (currentMove.startingTile.row == currentMove.currentTile.row){
+
+			if(currentMove.moveDirection < 0 ){ //-1 is left +1 is right
+				while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
 					moveMade = true;
 				}
 				if(moveMade){
-					int lastIndex = rows[mouseInTile.row].Length - 1;
-					AddNextTile(rows[mouseInTile.row], lastIndex);
+					int lastIndex = rows[currentMove.currentTile.row].Length - 1;
+					AddNextTile(rows[currentMove.currentTile.row], lastIndex);
 				}
 			} else {
-				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {
+				while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
 					moveMade = true;
 				}
 				if(moveMade){
-					AddNextTile(rows[mouseInTile.row], 0);
+					AddNextTile(rows[currentMove.currentTile.row], 0);
 				}
 			}
 			AfterSlide();
 			return;
 		}
 
-		if(mouseInTile.col == mouseDownStartTile.col){
-			if(mouseInTile.row < mouseDownStartTile.row){
-				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {
+		if(currentMove.startingTile.col == currentMove.currentTile.col){
+			if(currentMove.moveDirection < 0){ // -1 is down +1 is up
+				while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
 					moveMade = true;
 				}
 				if(moveMade){
-					int lastIndex = columns[mouseInTile.col].Length - 1;
-					AddNextTile(columns[mouseInTile.col], lastIndex);
+					int lastIndex = columns[currentMove.currentTile.col].Length - 1;
+					AddNextTile(columns[currentMove.currentTile.col], lastIndex);
 				}
 			} else {
-				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {
+				while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
 					moveMade = true;
 				}
 				if(moveMade){
-					AddNextTile(columns[mouseInTile.col], 0);
+					AddNextTile(columns[currentMove.currentTile.col], 0);
 				}
 			}
 			AfterSlide();
 			return;
 		}
 
-		print ("no slide");
 	}
 
 	void AddNextTile(Tile[] rowOrColumn, int index){
@@ -385,7 +357,11 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+
+
+
 	void AfterRotate(){
+		lastRotatedTile = currentMove.currentTile;
 		BoardStateChanged();
 	}
 
@@ -415,19 +391,21 @@ public class BoardManager : MonoBehaviour {
 				VictoryText.text = "No Victory";
 			}
 		}
+
+		currentMove = null;
 	}
 
 
 	void Update () {
-		if(moveInProgress){
-			float move = Input.GetAxis("Vertical");
-			print ("move: " + move);
-		}
+//		if(currentMove != null){
+//			float move = Input.GetAxis("Vertical");
+//			print ("move: " + move);
+//		}
 
 		if(Input.GetKeyDown(KeyCode.Space)){
-			if(mouseInTile){
-				bool[] rowCombinations = CheckTileCombinationsUpIndex(rows[mouseInTile.row]);
-				bool[] colCombinations = CheckTileCombinationsUpIndex(columns[mouseInTile.col]);
+			if(currentMove.currentTile){
+				bool[] rowCombinations = CheckTileCombinationsUpIndex(rows[currentMove.currentTile.row]);
+				bool[] colCombinations = CheckTileCombinationsUpIndex(columns[currentMove.currentTile.col]);
 
 
 
@@ -447,11 +425,54 @@ public class BoardManager : MonoBehaviour {
 }
 
 public class Move {
-	Tile startingTile;
+	public Tile startingTile;
+	public Tile currentTile;
 	public Tile[] tileList;
-	public bool moveIsUpIndex;
+	public int moveDirection;
+	public bool isClick;
 
-	public Move(Tile _startingTile){
-		startingTile = _startingTile;
+	public Move(Tile startingTile){
+		this.startingTile = startingTile;
+		this.currentTile = startingTile;
+		isClick = true;
 	}
+
+	public void MoveToTile(Tile tile){
+		currentTile = tile;
+		if(!currentTile.SameTile(startingTile)){
+			isClick = false;
+		}
+	}
+	
+
+	public void ComputeMoveDirection(BoardManager boardManager){
+		if (!startingTile.SameTile(currentTile)) {
+
+			// figure out if we're dragging the column or the row
+			if(startingTile.col == currentTile.col){
+				tileList = boardManager.columns[currentTile.col];
+				
+				// determine direction of move within col
+				if(currentTile.row > startingTile.row){
+					moveDirection = 1;
+				} else {
+					moveDirection = -1;
+				}
+
+			}
+
+			if(startingTile.row == currentTile.row){
+				tileList = boardManager.rows[currentTile.row];
+
+				// determine direction of move within row
+				if(currentTile.col > startingTile.col){
+					moveDirection = 1;
+				} else {
+					moveDirection = -1;
+				}
+			
+			}
+		}
+	}
+	
 }
