@@ -275,47 +275,40 @@ public class BoardManager : MonoBehaviour {
 
         bool moveMade = false;
 
-		if (currentMove.startingTile.row == currentMove.currentTile.row){
-
-			if(currentMove.moveDirection < 0 ){ //-1 is left +1 is right
-				while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					int lastIndex = rows[currentMove.currentTile.row].Length - 1;
-					AddNextTile(rows[currentMove.currentTile.row], lastIndex);
-				}
-			} else {
-				while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					AddNextTile(rows[currentMove.currentTile.row], 0);
-				}
+		if(currentMove.moveDirection == MoveDirection.Left ){
+			while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
+				moveMade = true;
 			}
-			AfterSlide();
-			return;
+			if(moveMade){
+				int lastIndex = rows[currentMove.currentTile.row].Length - 1;
+				AddNextTile(rows[currentMove.currentTile.row], lastIndex);
+			}
+		} else if(currentMove.moveDirection == MoveDirection.Right) {
+			while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
+				moveMade = true;
+			}
+			if(moveMade){
+				AddNextTile(rows[currentMove.currentTile.row], 0);
+			}
+		} else if(currentMove.moveDirection == MoveDirection.Down){
+			while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
+				moveMade = true;
+			}
+			if(moveMade){
+				int lastIndex = columns[currentMove.currentTile.col].Length - 1;
+				AddNextTile(columns[currentMove.currentTile.col], lastIndex);
+			}
+		} else if(currentMove.moveDirection == MoveDirection.Up) {
+			while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
+				moveMade = true;
+			}
+			if(moveMade){
+				AddNextTile(columns[currentMove.currentTile.col], 0);
+			}
 		}
 
-		if(currentMove.startingTile.col == currentMove.currentTile.col){
-			if(currentMove.moveDirection < 0){ // -1 is down +1 is up
-				while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					int lastIndex = columns[currentMove.currentTile.col].Length - 1;
-					AddNextTile(columns[currentMove.currentTile.col], lastIndex);
-				}
-			} else {
-				while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					AddNextTile(columns[currentMove.currentTile.col], 0);
-				}
-			}
+		if(moveMade){
 			AfterSlide();
-			return;
 		}
 
 	}
@@ -394,17 +387,14 @@ public class BoardManager : MonoBehaviour {
 
 	void Update () {
 		if(currentMove != null){
-			print (currentMove.startingTile.canonicalPosition);
-			Vector3 newPos = currentMove.startingTile.canonicalPosition - currentMove.GetMouseMoveWorldSpace();
-			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, 0);
+			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
+//			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, 0);
 		}
 
 		if(Input.GetKeyDown(KeyCode.Space)){
 			if(currentMove.currentTile){
 				bool[] rowCombinations = CheckTileCombinationsUpIndex(rows[currentMove.currentTile.row]);
 				bool[] colCombinations = CheckTileCombinationsUpIndex(columns[currentMove.currentTile.col]);
-
-
 
 				print ("rowCombinations: ");
 				for(int i = 0; i < rowCombinations.Length; i++){
@@ -421,11 +411,15 @@ public class BoardManager : MonoBehaviour {
 	}
 }
 
+public enum MoveDirection {
+	Up, Down, Left, Right
+};
+
 public class Move {
 	public Tile startingTile;
 	public Tile currentTile;
 	public Tile[] tileList;
-	public int moveDirection;
+	public MoveDirection moveDirection;
 	public bool isClick;
 
 	Vector3 startingMousePositionScreenSpace; // screen space
@@ -438,11 +432,11 @@ public class Move {
 	}
 
 	public Vector3 GetMouseMoveScreenSpace(){
-		return startingMousePositionScreenSpace - Input.mousePosition;
+		return Input.mousePosition - startingMousePositionScreenSpace;
 	}
 
 	public Vector3 GetMouseMoveWorldSpace(){
-		return  Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace) - Camera.main.ScreenToWorldPoint(Input.mousePosition);
+		return Camera.main.ScreenToWorldPoint(Input.mousePosition) - Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace);
 	}
 
 	public void MoveToTile(Tile tile){
@@ -461,9 +455,9 @@ public class Move {
 				
 				// determine direction of move within col
 				if(currentTile.row > startingTile.row){
-					moveDirection = 1;
+					moveDirection = MoveDirection.Up;
 				} else {
-					moveDirection = -1;
+					moveDirection = MoveDirection.Down;
 				}
 
 			}
@@ -473,9 +467,9 @@ public class Move {
 
 				// determine direction of move within row
 				if(currentTile.col > startingTile.col){
-					moveDirection = 1;
+					moveDirection = MoveDirection.Right;
 				} else {
-					moveDirection = -1;
+					moveDirection = MoveDirection.Left;
 				}
 			
 			}
