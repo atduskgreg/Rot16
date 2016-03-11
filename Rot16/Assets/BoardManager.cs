@@ -386,11 +386,6 @@ public class BoardManager : MonoBehaviour {
 		currentMove.startingTile.EnableCollider();
 		currentMove.startingTile.ResetToCanonicalPosition();
 		currentMove = null;
-
-	}
-
-	void ReEnableBoxCollider() { 
-		currentMove.startingTile.GetComponent<BoxCollider2D>().enabled = true;
 	}
 
 	void Update () {
