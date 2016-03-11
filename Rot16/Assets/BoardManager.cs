@@ -131,7 +131,8 @@ public class BoardManager : MonoBehaviour {
 		for(int i = 0; i < tiles.Length-1; i++){
 			Tile here = tiles[i];
 			Tile next = tiles[i+1];
-			canSlide = here.CanCombineWith(next) || here.CanMoveInto(next);
+            bool thisResult = here.CanCombineWith(next) || here.CanMoveInto(next);
+            canSlide = canSlide || thisResult;
         }
 		return canSlide;
 	}
