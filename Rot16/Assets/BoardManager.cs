@@ -251,7 +251,6 @@ public class BoardManager : MonoBehaviour {
 	public void MouseDownInTile(Tile tile){
 		currentMove = new Move(tile);
 		currentMove.startingTile.DisableCollider();
-		tile.transform.position = new Vector3(tile.transform.position.x, tile.transform.position.y, 10);
 	}
 
 	public void MouseInTile(Tile tile){
@@ -391,7 +390,7 @@ public class BoardManager : MonoBehaviour {
 	void Update () {
 		if(currentMove != null){
 			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
-			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, newPos.z);
+			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, -10);
 		}
 
 
@@ -440,7 +439,9 @@ public class Move {
 	}
 
 	public Vector3 GetMouseMoveWorldSpace(){
-		return Camera.main.ScreenToWorldPoint(Input.mousePosition) - Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace);
+		Vector3 move = Camera.main.ScreenToWorldPoint(Input.mousePosition) - Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace);
+		move.z = 0;
+		return move;
 	}
 
 	public void MoveToTile(Tile tile){
