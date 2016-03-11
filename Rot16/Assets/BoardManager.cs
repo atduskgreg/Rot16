@@ -150,17 +150,15 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
-		for (int i =0; i< LineOfTiles.Length-1; i++) 
-		{
-			//MOVE BLOCK 
-			// move into empty spaces.
-			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i+1].isEmpty()){
-				LineOfTiles[i].setTileId(LineOfTiles[i+1].tileId);
-				LineOfTiles[i+1].setTileId(Tile.EmptyTileId);
-				return true;
-			}
-			// MERGE BLOCK
-			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
+        for (int i = 0; i < LineOfTiles.Length - 1; i++) {
+            //MOVE BLOCK 
+            // move into empty spaces.
+            if (LineOfTiles[i].isEmpty() && !LineOfTiles[i + 1].isEmpty()) {
+                LineOfTiles[i].setTileId(LineOfTiles[i + 1].tileId);
+                LineOfTiles[i + 1].setTileId(Tile.EmptyTileId);
+                return true;
+            // MERGE BLOCK
+            } else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
 			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i+1].mergedThisTurn == false){
 
 				LineOfTiles[i].CombineWith(LineOfTiles[i+1]);
