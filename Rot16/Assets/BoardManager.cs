@@ -142,13 +142,10 @@ public class BoardManager : MonoBehaviour {
 
 		foreach(Tile[] column in columns){
 			result = result || TilesCanSlide(column);
-			print ("col " + column[0].col + ": " + result);
-
 		}
+
 		foreach(Tile[] row in rows){
 			result = result || TilesCanSlide(row);
-			print ("row " + row[0].row + ": " + result);
-
 		}
 
 		return result;
