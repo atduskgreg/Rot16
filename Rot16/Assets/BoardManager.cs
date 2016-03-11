@@ -392,7 +392,14 @@ public class BoardManager : MonoBehaviour {
 	void Update () {
 		if(currentMove != null){
 			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
-			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, -10);
+			newPos.z = -10;
+			if(currentMove.moveDirection == MoveDirection.Left || currentMove.moveDirection == MoveDirection.Right){
+				newPos.y = currentMove.startingTile.canonicalPosition.y;
+			} else if(currentMove.moveDirection == MoveDirection.Up || currentMove.moveDirection == MoveDirection.Down){
+				newPos.x = currentMove.startingTile.canonicalPosition.x;
+			}
+
+			currentMove.startingTile.transform.position = newPos;
 		}
 
 
