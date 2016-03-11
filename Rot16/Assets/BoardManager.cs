@@ -251,6 +251,7 @@ public class BoardManager : MonoBehaviour {
 	public void MouseDownInTile(Tile tile){
 		currentMove = new Move(tile);
 		currentMove.startingTile.DisableCollider();
+		currentMove.startingTile.MakeTransparent();
 	}
 
 	public void MouseInTile(Tile tile){
@@ -384,6 +385,7 @@ public class BoardManager : MonoBehaviour {
 	void ResetDraggedTiles(){
 		currentMove.startingTile.EnableCollider();
 		currentMove.startingTile.ResetToCanonicalPosition();
+		currentMove.startingTile.MakeOpaque();
 		currentMove = null;
 	}
 

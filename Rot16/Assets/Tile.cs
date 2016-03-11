@@ -113,6 +113,15 @@ public class Tile : MonoBehaviour {
 		transform.position = canonicalPosition;
 	}
 
+	public void MakeTransparent(){
+		GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.5f);
+	}
+
+	public void MakeOpaque(){
+		GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
+
+	}
+
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
 		updateSprite();
