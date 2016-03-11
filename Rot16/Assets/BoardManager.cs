@@ -14,6 +14,11 @@ public class BoardManager : MonoBehaviour {
 	public Material VerticalLineMaterial;
 	public Material HorizontalLineMaterial;
 
+	public int pathHighlightWeight = 2;
+
+	public int verticalPathOffset = 2;
+	public int horizontalPathOffset = -2;
+
 	List<Path> VerticalPaths = new List<Path>();
 	List<Path> HorizontalPaths = new List<Path>(); 
 	List<VectorLine> scoreLines = new List<VectorLine>();
@@ -22,8 +27,8 @@ public class BoardManager : MonoBehaviour {
 	PathFinder pathFinder;
 
 	public Tile[,] AllTiles = new Tile[4,4];
-	private List <Tile[]> columns = new List<Tile[]> ();
-	private List <Tile[]> rows = new List<Tile[]> ();
+	public List <Tile[]> columns = new List<Tile[]> ();
+	public List <Tile[]> rows = new List<Tile[]> ();
 
 	private int horizontalScore = 0;
 	private int verticalScore = 0;
@@ -48,9 +53,7 @@ public class BoardManager : MonoBehaviour {
 		HorizontalScoreText.text = "" + horizontalScore;
 		VerticalScoreText.text = "" + verticalScore;
 	}
-
-	// TODO: capture scoring paths and draw them using the lineRenderers
-
+	
 	int VerticalScore(){
 		int score = 0;
 		VerticalPaths.Clear();
@@ -122,17 +125,14 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	bool TilesCanSlide(Tile[] tiles){
-		bool result = false;
+		bool canSlide = false;
 		for(int i = 0; i < tiles.Length-1; i++){
 			Tile here = tiles[i];
 			Tile next = tiles[i+1];
-
-			bool thisResult = here.CanCombineWith(next) || here.CanMoveInto(next);
-			result = result || thisResult;
-		}
-
-
-		return result;
+            bool thisResult = here.CanCombineWith(next) || here.CanMoveInto(next);
+            canSlide = canSlide || thisResult;
+        }
+		return canSlide;
 	}
 
 	bool SlidesAvailable(){
@@ -141,6 +141,7 @@ public class BoardManager : MonoBehaviour {
 		foreach(Tile[] column in columns){
 			result = result || TilesCanSlide(column);
 		}
+
 		foreach(Tile[] row in rows){
 			result = result || TilesCanSlide(row);
 		}
@@ -148,18 +149,64 @@ public class BoardManager : MonoBehaviour {
 		return result;
 	}
 
-	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
-		for (int i =0; i< LineOfTiles.Length-1; i++) 
-		{
+	bool[] CheckTileCombinationsDownIndex(Tile[] LineOfTiles){
+		bool[] canCombine = new bool[LineOfTiles.Length-1];
+
+		for (int i = 0; i < LineOfTiles.Length-1; i++) {
 			//MOVE BLOCK 
-			// move into empty spaces.
 			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i+1].isEmpty()){
-				LineOfTiles[i].setTileId(LineOfTiles[i+1].tileId);
-				LineOfTiles[i+1].setTileId(Tile.EmptyTileId);
-				return true;
+				canCombine[i] = true;
 			}
+
+			// if the one to our left merged, we can't merge with it
+			else if(i > 0 && canCombine[i-1] == true){
+				canCombine[i] = false;	
+			}
+
 			// MERGE BLOCK
-			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
+			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1])){
+				canCombine[i] = true;	
+			}
+		}
+		return canCombine;
+	}
+
+	bool[] CheckTileCombinationsUpIndex(Tile[] LineOfTiles){
+		bool[] canCombine = new bool[LineOfTiles.Length-1];
+		int resultIndex = 0;
+
+		for (int i = LineOfTiles.Length-1; i > 0; i--) {
+			//MOVE BLOCK 
+			if (LineOfTiles[i].isEmpty()  && !LineOfTiles[i-1].isEmpty()){
+				canCombine[resultIndex] = true;
+				resultIndex++;
+			}
+			
+			// if the one to our left merged, we can't merge with it
+			else if(resultIndex > 0 && canCombine[resultIndex-1] == true){
+				canCombine[resultIndex] = false;
+				resultIndex++;
+			}
+			
+			// MERGE BLOCK
+			else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i-1])){
+				canCombine[resultIndex] = true;
+				resultIndex++;
+			}
+		}
+		return canCombine;
+	}
+
+	bool MakeOneMoveDownIndex(Tile[] LineOfTiles){
+        for (int i = 0; i < LineOfTiles.Length - 1; i++) {
+            //MOVE BLOCK 
+            // move into empty spaces.
+            if (LineOfTiles[i].isEmpty() && !LineOfTiles[i + 1].isEmpty()) {
+                LineOfTiles[i].setTileId(LineOfTiles[i + 1].tileId);
+                LineOfTiles[i + 1].setTileId(Tile.EmptyTileId);
+                return true;
+            // MERGE BLOCK
+            } else if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i+1]) &&
 			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i+1].mergedThisTurn == false){
 
 				LineOfTiles[i].CombineWith(LineOfTiles[i+1]);
@@ -171,20 +218,20 @@ public class BoardManager : MonoBehaviour {
 		return false;
 	}
 
-	bool MakeOneMoveUpIndex(Tile[] LineOfTiles)
-	{
-		for (int i =LineOfTiles.Length-1; i > 0; i--) {
-			//MOVE BLOCK 
-			if (LineOfTiles[i].isEmpty() && !LineOfTiles[i-1].isEmpty ()){
-
-				LineOfTiles[i].setTileId(LineOfTiles[i-1].tileId);
-				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
-				return true;
-			}
-			// MERGE BLOCK
-			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i-1]) &&
-			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i-1].mergedThisTurn == false)
-			{
+	bool MakeOneMoveUpIndex(Tile[] LineOfTiles) {
+        for (int i = LineOfTiles.Length - 1; i > 0; i--) {
+            // MOVE BLOCK 
+            if (LineOfTiles[i].isEmpty() && !LineOfTiles[i - 1].isEmpty()) {
+                LineOfTiles[i].setTileId(LineOfTiles[i - 1].tileId);
+                LineOfTiles[i - 1].setTileId(Tile.EmptyTileId);
+                return true;
+            // MERGE BLOCK
+            } else if (
+                !LineOfTiles[i].isEmpty() &&
+                LineOfTiles[i].mergedThisTurn == false &&
+                LineOfTiles[i - 1].mergedThisTurn == false &&
+                LineOfTiles[i].CanCombineWith(LineOfTiles[i-1])
+            ) {
 				LineOfTiles[i].CombineWith(LineOfTiles[i-1]);
 				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
 				LineOfTiles[i].mergedThisTurn = true;
@@ -194,100 +241,79 @@ public class BoardManager : MonoBehaviour {
 		return false;
 	}
 
-
 	private void ResetMergedFlags(){
 		foreach (Tile t in AllTiles){
 			t.mergedThisTurn = false;
 		}
 	}
 
-	Tile mouseDownStartTile;
+	Move currentMove;
 	public void MouseDownInTile(Tile tile){
-		mouseDownStartTile = tile;
-        mouseLeftTile = false;
+		currentMove = new Move(tile);
+		currentMove.startingTile.DisableCollider();
+		currentMove.startingTile.MakeTransparent();
 	}
 
-	Tile mouseInTile;
 	public void MouseInTile(Tile tile){
-		mouseInTile = tile;
-        if (mouseDownStartTile && !mouseInTile.SameTile(mouseDownStartTile)) {
-            mouseLeftTile = true;
-        }
+		if(currentMove != null){
+			currentMove.MoveToTile(tile);
+			currentMove.ComputeMoveDirection(this);
+		}
 	}
 
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
-        if (mouseInTile.SameTile(mouseDownStartTile)) {
-            if (!mouseLeftTile) {
-				if(!lastRotatedTile || !mouseInTile.SameTile(lastRotatedTile)){
-                	mouseInTile.GetComponent<Tile>().rotateTile();
-                	AfterRotate();
-					lastRotatedTile = mouseInTile;
-				}
-            }
-			return;
-		} 
 
-		ResetMergedFlags();
-
-		if(mouseInTile.row == mouseDownStartTile.row){
-
-			if(mouseInTile.col < mouseDownStartTile.col){
-				bool moveMade = false;
-				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {
-					moveMade = true;
-				}
-
-				if(moveMade){
-					int lastIndex = rows[mouseInTile.row].Length - 1;
-					AddNextTile(rows[mouseInTile.row], lastIndex);
-				}
-
-
-			} else {
-				bool moveMade = false;
-				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {
-					moveMade = true;
-				}
-
-				if(moveMade){
-					AddNextTile(rows[mouseInTile.row], 0);
-
-				}
-
+        if (currentMove.isClick) {
+			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
+				currentMove.currentTile.GetComponent<Tile>().rotateTile();
+                AfterRotate();
 			}
-			AfterSlide();
-			return;
+		} else {
+
+			ResetMergedFlags();
+			
+        	bool moveMade = false;
+			
+			if(currentMove.moveDirection == MoveDirection.Left ){
+				while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					int lastIndex = rows[currentMove.currentTile.row].Length - 1;
+					AddNextTile(rows[currentMove.currentTile.row], lastIndex);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Right) {
+				while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					AddNextTile(rows[currentMove.currentTile.row], 0);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Down){
+				while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					int lastIndex = columns[currentMove.currentTile.col].Length - 1;
+					AddNextTile(columns[currentMove.currentTile.col], lastIndex);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Up) {
+				while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					AddNextTile(columns[currentMove.currentTile.col], 0);
+				}
+			}
+
+			if(moveMade){
+				AfterSlide();
+			}
 		}
 
-		if(mouseInTile.col == mouseDownStartTile.col){
-
-			if(mouseInTile.row < mouseDownStartTile.row){
-				bool moveMade = false;
-				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					int lastIndex = columns[mouseInTile.col].Length - 1;
-					AddNextTile(columns[mouseInTile.col], lastIndex);
-				}
-
-			} else {
-				bool moveMade = false;
-				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {
-					moveMade = true;
-				}
-				if(moveMade){
-					AddNextTile(columns[mouseInTile.col], 0);
-				}
-
-			}
-			AfterSlide();
-			return;
-		}
-
-		print ("no slide");
+		ResetDraggedTiles();
 	}
 
 	void AddNextTile(Tile[] rowOrColumn, int index){
@@ -295,27 +321,42 @@ public class BoardManager : MonoBehaviour {
 		NextTile.assignStartingTile();
 	}
 
-	void DrawPath(List<Path> paths, Material material){
+	void DrawPath(List<Path> paths, Material material, int pathOffset){
 		foreach(Path path in paths){
 			List<Vector3> linePoints = new List<Vector3>();
 
+//			for(int i = 0; i < path.nodes.Count-1; i+=2){
+//				Vector3 prev = new Vector3((path.nodes[i].col-1) * spriteSize, (path.nodes[i].row-1) * spriteSize, -1);
+//				Vector3 next = new Vector3((path.nodes[i+1].col-1) * spriteSize, (path.nodes[i+1].row-1) * spriteSize, -1);
+//
+//				if(prev.y == next.y){
+//					prev = new Vector3(prev.x + pathOffset, prev.y+pathOffset, prev.z);
+//					next = new Vector3(next.x + pathOffset, next.y+pathOffset, next.z);
+//				}
+//
+//				linePoints.Add(prev);
+//				linePoints.Add(next);
+//
+//			}
+
 			foreach(Node node in path.nodes){
-				linePoints.Add(new Vector3((node.col-1) * spriteSize, (node.row-1) * spriteSize, -1));
+				linePoints.Add(new Vector3((node.col-1) * spriteSize + pathOffset, (node.row-1) * spriteSize - pathOffset, -1));
 			}
 
-			VectorLine pathLine = new VectorLine("ScoreLine", linePoints, material, 5, LineType.Continuous, Joins.Weld);
+			VectorLine pathLine = new VectorLine("ScoreLine", linePoints, material, pathHighlightWeight, LineType.Continuous, Joins.Weld);
 			pathLine.Draw();
 			scoreLines.Add(pathLine);
 		}
 	}
-
+	
 	void AfterRotate(){
+		lastRotatedTile = currentMove.currentTile;
 		BoardStateChanged();
 	}
 
 	void AfterSlide(){
-		BoardStateChanged();
 		lastRotatedTile = null;
+		BoardStateChanged();
 	}
 
 	void BoardStateChanged(){
@@ -326,8 +367,8 @@ public class BoardManager : MonoBehaviour {
 		scoreLines.Clear();
 
 
-		DrawPath(VerticalPaths, VerticalLineMaterial);
-		DrawPath(HorizontalPaths, HorizontalLineMaterial);
+		DrawPath(VerticalPaths, VerticalLineMaterial, verticalPathOffset);
+		DrawPath(HorizontalPaths, HorizontalLineMaterial, horizontalPathOffset);
 
 		
 		if(!SlidesAvailable ()){
@@ -341,6 +382,112 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
-	void Update () {
+	void ResetDraggedTiles(){
+		currentMove.startingTile.EnableCollider();
+		currentMove.startingTile.ResetToCanonicalPosition();
+		currentMove.startingTile.MakeOpaque();
+		currentMove = null;
 	}
+
+	void Update () {
+		if(currentMove != null){
+			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
+			newPos.z = -10;
+			if(currentMove.moveDirection == MoveDirection.Left || currentMove.moveDirection == MoveDirection.Right){
+				newPos.y = currentMove.startingTile.canonicalPosition.y;
+			} else if(currentMove.moveDirection == MoveDirection.Up || currentMove.moveDirection == MoveDirection.Down){
+				newPos.x = currentMove.startingTile.canonicalPosition.x;
+			}
+
+			currentMove.startingTile.transform.position = newPos;
+		}
+
+
+		if(Input.GetKeyDown(KeyCode.Space)){
+			if(currentMove.currentTile){
+				bool[] rowCombinations = CheckTileCombinationsUpIndex(rows[currentMove.currentTile.row]);
+				bool[] colCombinations = CheckTileCombinationsUpIndex(columns[currentMove.currentTile.col]);
+
+				print ("rowCombinations: ");
+				for(int i = 0; i < rowCombinations.Length; i++){
+					print ("["+i+"] " + rowCombinations[i]);
+				}
+
+				print ("colCombinations: ");
+				for(int i = 0; i < colCombinations.Length; i++){
+					print ("["+i+"] " + colCombinations[i]);
+				}
+
+			}
+		}
+	}
+}
+
+public enum MoveDirection {
+	Up, Down, Left, Right
+};
+
+public class Move {
+	public Tile startingTile;
+	public Tile currentTile;
+	public Tile[] tileList;
+	public MoveDirection moveDirection;
+	public bool isClick;
+
+	Vector3 startingMousePositionScreenSpace; // screen space
+
+	public Move(Tile startingTile){
+		this.startingTile = startingTile;
+		this.currentTile = startingTile;
+		this.startingMousePositionScreenSpace = Input.mousePosition;
+		isClick = true;
+	}
+
+	public Vector3 GetMouseMoveScreenSpace(){
+		return Input.mousePosition - startingMousePositionScreenSpace;
+	}
+
+	public Vector3 GetMouseMoveWorldSpace(){
+		Vector3 move = Camera.main.ScreenToWorldPoint(Input.mousePosition) - Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace);
+		move.z = 0;
+		return move;
+	}
+
+	public void MoveToTile(Tile tile){
+		currentTile = tile;
+		if(!currentTile.SameTile(startingTile)){
+			isClick = false;
+		}
+	}
+
+	public void ComputeMoveDirection(BoardManager boardManager){
+		if (!startingTile.SameTile(currentTile)) {
+
+			// figure out if we're dragging the column or the row
+			if(startingTile.col == currentTile.col){
+				tileList = boardManager.columns[currentTile.col];
+				
+				// determine direction of move within col
+				if(currentTile.row > startingTile.row){
+					moveDirection = MoveDirection.Up;
+				} else {
+					moveDirection = MoveDirection.Down;
+				}
+
+			}
+
+			if(startingTile.row == currentTile.row){
+				tileList = boardManager.rows[currentTile.row];
+
+				// determine direction of move within row
+				if(currentTile.col > startingTile.col){
+					moveDirection = MoveDirection.Right;
+				} else {
+					moveDirection = MoveDirection.Left;
+				}
+			
+			}
+		}
+	}
+	
 }

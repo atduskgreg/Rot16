@@ -168,26 +168,25 @@ public class PathFinder : MonoBehaviour {
 	}
 
 	void Update(){
-		if(Input.GetKeyDown(KeyCode.Space)){
-			Tile testTile = GetComponent<BoardManager>().AllTiles[testTileRow, testTileCol];
-			print ("testTile id: "+ testTile.tileId);
-			List<Vector2[]> localEdges = ConnectedNodesForTileId(testTile.tileId);
-			foreach(Vector2[] edge in localEdges){
-				print(edge[0].x +"x" + edge[0].y + " -> " + edge[1].x +"x" + edge[1].y);
-			}
-//			Tile fromTile = GetComponent<BoardManager>().AllTiles[(int)testFrom.x/2, (int)testFrom.y/2];
-//			Tile toTile = GetComponent<BoardManager>().AllTiles[(int)testTo.x/2, (int)testTo.y/2];
-
-//			print("fromTile id: " + fromTile.tileId + " toTile id: " + toTile.tileId);
-//			ConnectedNodesForTileId()
-
-			Path testResult = GetPath(testFrom, testTo);
-			print("path exists? " + testResult.Exists);
-			foreach(Node node in testResult.nodes){
-				print (node.col +"x"+ node.row);
-			}
-
-		}
+//		if(Input.GetKeyDown(KeyCode.Space)){
+//			Tile testTile = GetComponent<BoardManager>().AllTiles[testTileRow, testTileCol];
+//			print ("testTile id: "+ testTile.tileId);
+//			List<Vector2[]> localEdges = ConnectedNodesForTileId(testTile.tileId);
+//			foreach(Vector2[] edge in localEdges){
+//				print(edge[0].x +"x" + edge[0].y + " -> " + edge[1].x +"x" + edge[1].y);
+//			}
+////			Tile fromTile = GetComponent<BoardManager>().AllTiles[(int)testFrom.x/2, (int)testFrom.y/2];
+////			Tile toTile = GetComponent<BoardManager>().AllTiles[(int)testTo.x/2, (int)testTo.y/2];
+//
+////			print("fromTile id: " + fromTile.tileId + " toTile id: " + toTile.tileId);
+////			ConnectedNodesForTileId()
+//
+//			Path testResult = GetPath(testFrom, testTo);
+//			foreach(Node node in testResult.nodes){
+//				print (node.col +"x"+ node.row);
+//			}
+//
+//		}
 	}
 }
 
