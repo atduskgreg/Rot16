@@ -127,17 +127,13 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	bool TilesCanSlide(Tile[] tiles){
-		bool result = false;
+		bool canSlide = false;
 		for(int i = 0; i < tiles.Length-1; i++){
 			Tile here = tiles[i];
 			Tile next = tiles[i+1];
-
-			bool thisResult = here.CanCombineWith(next) || here.CanMoveInto(next);
-			result = result || thisResult;
-		}
-
-
-		return result;
+			canSlide = here.CanCombineWith(next) || here.CanMoveInto(next);
+        }
+		return canSlide;
 	}
 
 	bool SlidesAvailable(){
@@ -176,20 +172,20 @@ public class BoardManager : MonoBehaviour {
 		return false;
 	}
 
-	bool MakeOneMoveUpIndex(Tile[] LineOfTiles)
-	{
-		for (int i =LineOfTiles.Length-1; i > 0; i--) {
-			//MOVE BLOCK 
-			if (LineOfTiles[i].isEmpty() && !LineOfTiles[i-1].isEmpty ()){
-
-				LineOfTiles[i].setTileId(LineOfTiles[i-1].tileId);
-				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
-				return true;
-			}
-			// MERGE BLOCK
-			if (!LineOfTiles[i].isEmpty() && LineOfTiles[i].CanCombineWith(LineOfTiles[i-1]) &&
-			    LineOfTiles[i].mergedThisTurn == false && LineOfTiles[i-1].mergedThisTurn == false)
-			{
+	bool MakeOneMoveUpIndex(Tile[] LineOfTiles) {
+        for (int i = LineOfTiles.Length - 1; i > 0; i--) {
+            // MOVE BLOCK 
+            if (LineOfTiles[i].isEmpty() && !LineOfTiles[i - 1].isEmpty()) {
+                LineOfTiles[i].setTileId(LineOfTiles[i - 1].tileId);
+                LineOfTiles[i - 1].setTileId(Tile.EmptyTileId);
+                return true;
+            // MERGE BLOCK
+            } else if (
+                !LineOfTiles[i].isEmpty() &&
+                LineOfTiles[i].mergedThisTurn == false &&
+                LineOfTiles[i - 1].mergedThisTurn == false &&
+                LineOfTiles[i].CanCombineWith(LineOfTiles[i-1])
+            ) {
 				LineOfTiles[i].CombineWith(LineOfTiles[i-1]);
 				LineOfTiles[i-1].setTileId(Tile.EmptyTileId);
 				LineOfTiles[i].mergedThisTurn = true;
@@ -198,7 +194,6 @@ public class BoardManager : MonoBehaviour {
 		}
 		return false;
 	}
-
 
 	private void ResetMergedFlags(){
 		foreach (Tile t in AllTiles){

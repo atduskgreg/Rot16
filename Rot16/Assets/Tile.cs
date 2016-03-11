@@ -25,23 +25,6 @@ public class Tile : MonoBehaviour {
 		{"4+7", 8},
 		{"7+4", 8},
 		{"7+6", 11},
-		// three-sided squares. not allowed because lame
-//		{"7+9", 12},
-//		{"9+7", 12},
-//		{"5+8", 12},
-//		{"8+5", 12},
-//		{"6+8", 15},
-//		{"8+6", 15},
-//		{"6+9", 13},
-//		{"9+6", 13},
-//		{"4+10", 13},
-//		{"10+4", 13},
-//		{"10+7", 14},
-//		{"7+10", 14},
-//		{"4+11", 15},
-//		{"11+4", 15},
-//		{"5+11", 14},
-//		{"11+5", 14},
 		{"9+11", 3},
 		{"11+9", 3},
 		{"8+10", 3},
@@ -121,9 +104,7 @@ public class Tile : MonoBehaviour {
 		updateSprite();
 	}
 	
-	void Update () {
-		
-	}
+	void Update () {}
 	
     public bool SameTile(Tile otherTile) {
         return row == otherTile.row && col == otherTile.col;
