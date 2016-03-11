@@ -236,40 +236,31 @@ public class BoardManager : MonoBehaviour {
 
 		ResetMergedFlags();
 
-		if(mouseInTile.row == mouseDownStartTile.row){
+        bool moveMade = false;
 
+        if (mouseInTile.row == mouseDownStartTile.row){
 			if(mouseInTile.col < mouseDownStartTile.col){
-				bool moveMade = false;
 				while (MakeOneMoveDownIndex(rows[mouseInTile.row])) {
 					moveMade = true;
 				}
-
 				if(moveMade){
 					int lastIndex = rows[mouseInTile.row].Length - 1;
 					AddNextTile(rows[mouseInTile.row], lastIndex);
 				}
-
-
 			} else {
-				bool moveMade = false;
 				while (MakeOneMoveUpIndex(rows[mouseInTile.row])) {
 					moveMade = true;
 				}
-
 				if(moveMade){
 					AddNextTile(rows[mouseInTile.row], 0);
-
 				}
-
 			}
 			AfterSlide();
 			return;
 		}
 
 		if(mouseInTile.col == mouseDownStartTile.col){
-
 			if(mouseInTile.row < mouseDownStartTile.row){
-				bool moveMade = false;
 				while (MakeOneMoveDownIndex(columns[mouseInTile.col])) {
 					moveMade = true;
 				}
@@ -277,16 +268,13 @@ public class BoardManager : MonoBehaviour {
 					int lastIndex = columns[mouseInTile.col].Length - 1;
 					AddNextTile(columns[mouseInTile.col], lastIndex);
 				}
-
 			} else {
-				bool moveMade = false;
 				while (MakeOneMoveUpIndex(columns[mouseInTile.col])) {
 					moveMade = true;
 				}
 				if(moveMade){
 					AddNextTile(columns[mouseInTile.col], 0);
 				}
-
 			}
 			AfterSlide();
 			return;
