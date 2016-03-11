@@ -101,6 +101,18 @@ public class Tile : MonoBehaviour {
 		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
 	}
 
+	public void DisableCollider(){
+		GetComponent<BoxCollider2D>().enabled = false;
+	}
+
+	public void EnableCollider(){
+		GetComponent<BoxCollider2D>().enabled = true;
+	}
+
+	public void ResetToCanonicalPosition(){
+		transform.position = canonicalPosition;
+	}
+
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
 		updateSprite();

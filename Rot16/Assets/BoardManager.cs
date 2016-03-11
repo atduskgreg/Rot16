@@ -250,6 +250,8 @@ public class BoardManager : MonoBehaviour {
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
 		currentMove = new Move(tile);
+		currentMove.startingTile.DisableCollider();
+		tile.transform.position = new Vector3(tile.transform.position.x, tile.transform.position.y, 10);
 	}
 
 	public void MouseInTile(Tile tile){
@@ -268,49 +270,50 @@ public class BoardManager : MonoBehaviour {
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
                 AfterRotate();
 			}
-			return;
-		} 
+		} else {
 
-		ResetMergedFlags();
+			ResetMergedFlags();
+			
+        	bool moveMade = false;
+			
+			if(currentMove.moveDirection == MoveDirection.Left ){
+				while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					int lastIndex = rows[currentMove.currentTile.row].Length - 1;
+					AddNextTile(rows[currentMove.currentTile.row], lastIndex);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Right) {
+				while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					AddNextTile(rows[currentMove.currentTile.row], 0);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Down){
+				while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					int lastIndex = columns[currentMove.currentTile.col].Length - 1;
+					AddNextTile(columns[currentMove.currentTile.col], lastIndex);
+				}
+			} else if(currentMove.moveDirection == MoveDirection.Up) {
+				while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
+					moveMade = true;
+				}
+				if(moveMade){
+					AddNextTile(columns[currentMove.currentTile.col], 0);
+				}
+			}
 
-        bool moveMade = false;
-
-		if(currentMove.moveDirection == MoveDirection.Left ){
-			while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
-				moveMade = true;
-			}
 			if(moveMade){
-				int lastIndex = rows[currentMove.currentTile.row].Length - 1;
-				AddNextTile(rows[currentMove.currentTile.row], lastIndex);
-			}
-		} else if(currentMove.moveDirection == MoveDirection.Right) {
-			while (MakeOneMoveUpIndex(rows[currentMove.currentTile.row])) {
-				moveMade = true;
-			}
-			if(moveMade){
-				AddNextTile(rows[currentMove.currentTile.row], 0);
-			}
-		} else if(currentMove.moveDirection == MoveDirection.Down){
-			while (MakeOneMoveDownIndex(columns[currentMove.currentTile.col])) {
-				moveMade = true;
-			}
-			if(moveMade){
-				int lastIndex = columns[currentMove.currentTile.col].Length - 1;
-				AddNextTile(columns[currentMove.currentTile.col], lastIndex);
-			}
-		} else if(currentMove.moveDirection == MoveDirection.Up) {
-			while (MakeOneMoveUpIndex(columns[currentMove.currentTile.col])) {
-				moveMade = true;
-			}
-			if(moveMade){
-				AddNextTile(columns[currentMove.currentTile.col], 0);
+				AfterSlide();
 			}
 		}
 
-		if(moveMade){
-			AfterSlide();
-		}
-
+		ResetDraggedTiles();
 	}
 
 	void AddNextTile(Tile[] rowOrColumn, int index){
@@ -345,10 +348,7 @@ public class BoardManager : MonoBehaviour {
 			scoreLines.Add(pathLine);
 		}
 	}
-
-
-
-
+	
 	void AfterRotate(){
 		lastRotatedTile = currentMove.currentTile;
 		BoardStateChanged();
@@ -380,16 +380,25 @@ public class BoardManager : MonoBehaviour {
 				VictoryText.text = "No Victory";
 			}
 		}
-
-		currentMove = null;
 	}
 
+	void ResetDraggedTiles(){
+		currentMove.startingTile.EnableCollider();
+		currentMove.startingTile.ResetToCanonicalPosition();
+		currentMove = null;
+
+	}
+
+	void ReEnableBoxCollider() { 
+		currentMove.startingTile.GetComponent<BoxCollider2D>().enabled = true;
+	}
 
 	void Update () {
 		if(currentMove != null){
 			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
-//			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, 0);
+			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, newPos.z);
 		}
+
 
 		if(Input.GetKeyDown(KeyCode.Space)){
 			if(currentMove.currentTile){
