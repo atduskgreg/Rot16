@@ -53,9 +53,7 @@ public class BoardManager : MonoBehaviour {
 		HorizontalScoreText.text = "" + horizontalScore;
 		VerticalScoreText.text = "" + verticalScore;
 	}
-
-	// TODO: capture scoring paths and draw them using the lineRenderers
-
+	
 	int VerticalScore(){
 		int score = 0;
 		VerticalPaths.Clear();
@@ -395,10 +393,11 @@ public class BoardManager : MonoBehaviour {
 
 
 	void Update () {
-//		if(currentMove != null){
-//			float move = Input.GetAxis("Vertical");
-//			print ("move: " + move);
-//		}
+		if(currentMove != null){
+			print (currentMove.startingTile.canonicalPosition);
+			Vector3 newPos = currentMove.startingTile.canonicalPosition - currentMove.GetMouseMoveWorldSpace();
+			currentMove.startingTile.transform.position = new Vector3(newPos.x, newPos.y, 0);
+		}
 
 		if(Input.GetKeyDown(KeyCode.Space)){
 			if(currentMove.currentTile){
@@ -429,10 +428,21 @@ public class Move {
 	public int moveDirection;
 	public bool isClick;
 
+	Vector3 startingMousePositionScreenSpace; // screen space
+
 	public Move(Tile startingTile){
 		this.startingTile = startingTile;
 		this.currentTile = startingTile;
+		this.startingMousePositionScreenSpace = Input.mousePosition;
 		isClick = true;
+	}
+
+	public Vector3 GetMouseMoveScreenSpace(){
+		return startingMousePositionScreenSpace - Input.mousePosition;
+	}
+
+	public Vector3 GetMouseMoveWorldSpace(){
+		return  Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace) - Camera.main.ScreenToWorldPoint(Input.mousePosition);
 	}
 
 	public void MoveToTile(Tile tile){
@@ -441,7 +451,6 @@ public class Move {
 			isClick = false;
 		}
 	}
-	
 
 	public void ComputeMoveDirection(BoardManager boardManager){
 		if (!startingTile.SameTile(currentTile)) {

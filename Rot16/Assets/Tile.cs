@@ -11,6 +11,8 @@ public class Tile : MonoBehaviour {
 	public int row;
 	public int col;
 	public bool mergedThisTurn = false;
+
+	public Vector3 canonicalPosition;
 	
 	BoardManager boardManager;
 
@@ -102,6 +104,7 @@ public class Tile : MonoBehaviour {
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
 		updateSprite();
+		canonicalPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 	}
 	
 	void Update () {}
