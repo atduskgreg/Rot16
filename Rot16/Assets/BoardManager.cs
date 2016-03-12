@@ -249,13 +249,15 @@ public class BoardManager : MonoBehaviour {
 
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
+        if(tile == NextTile) { return; }
 		currentMove = new Move(tile);
 		currentMove.startingTile.DisableCollider();
 		currentMove.startingTile.MakeTransparent();
 	}
 
 	public void MouseInTile(Tile tile){
-		if(currentMove != null){
+        if (tile == NextTile) { return; }
+        if (currentMove != null){
 			currentMove.MoveToTile(tile);
 			currentMove.ComputeMoveDirection(this);
 		}
@@ -264,14 +266,13 @@ public class BoardManager : MonoBehaviour {
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
-
+        if (tile == NextTile) { return; }
         if (currentMove.isClick) {
 			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
                 AfterRotate();
 			}
 		} else {
-
 			ResetMergedFlags();
 			
         	bool moveMade = false;
@@ -312,7 +313,6 @@ public class BoardManager : MonoBehaviour {
 				AfterSlide();
 			}
 		}
-
 		ResetDraggedTiles();
 	}
 
