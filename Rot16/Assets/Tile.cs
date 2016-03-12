@@ -15,6 +15,7 @@ public class Tile : MonoBehaviour {
 	public Vector3 canonicalPosition;
 	
 	BoardManager boardManager;
+	GameObject tileDisplay;
 
 	public static Dictionary<string, int> combinationRules = new Dictionary< string, int>(){
 		{"0+1", 2},
@@ -71,6 +72,12 @@ public class Tile : MonoBehaviour {
 		}
 	}
 
+	public void MoveTo(Vector3 newPos) {
+		tileDisplay.transform.position = newPos;
+	}
+
+
+
 	// if this is not an empty tile
 	// it can move into the place of empty tiles
 	public bool CanMoveInto(Tile tile){
@@ -98,7 +105,9 @@ public class Tile : MonoBehaviour {
 
 	void updateSprite(){
 		Sprite[] sprites =  Resources.LoadAll<Sprite>("pieces");
-		GetComponent<SpriteRenderer>().sprite = sprites[tileId];
+		// FIXME: we find and set this in Start() why do we have to do this again here?
+		tileDisplay = transform.FindChild("TileDisplay").gameObject;
+		tileDisplay.GetComponent<SpriteRenderer>().sprite = sprites[tileId];
 	}
 
 	public void DisableCollider(){
@@ -110,20 +119,21 @@ public class Tile : MonoBehaviour {
 	}
 
 	public void ResetToCanonicalPosition(){
-		transform.position = canonicalPosition;
+		tileDisplay.transform.position = canonicalPosition;
 	}
 
 	public void MakeTransparent(){
-		GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.5f);
+		tileDisplay.GetComponent<SpriteRenderer>().color = new Color(1,1,1,0.5f);
 	}
 
 	public void MakeOpaque(){
-		GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
+		tileDisplay.GetComponent<SpriteRenderer>().color = new Color(1,1,1,1);
 
 	}
 
 	void Start () {
 		boardManager = GameObject.Find("GameManager").GetComponent<BoardManager>();
+		tileDisplay = transform.FindChild("TileDisplay").gameObject;
 		updateSprite();
 		canonicalPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
 	}
@@ -143,14 +153,19 @@ public class Tile : MonoBehaviour {
 	}
 
 	void OnMouseEnter(){
+		print ("mouse enter: " + row +"x"+col);
+
 		boardManager.MouseInTile(GetComponent<Tile>());
 	}
  
 	void OnMouseDown(){
+		print ("mouse down: " + row +"x"+col);
+
 		boardManager.MouseDownInTile(GetComponent<Tile>());
 	}
 	
 	void OnMouseUp(){
+		print ("mouse up: " + row +"x"+col);
 		boardManager.MouseUp();
 	}
 }

@@ -100,6 +100,7 @@ public class BoardManager : MonoBehaviour {
 		for (int col = 0; col < gridWidth; col++) {
 			for (int row = 0; row < gridHeight; row++) {
 				GameObject go = (GameObject)Instantiate(tilePrefab, new Vector3(col * spriteSize*2, row * spriteSize*2), Quaternion.identity);			
+
 				Tile tile = go.GetComponent<Tile>();
 
 				tile.row = row;
@@ -249,23 +250,23 @@ public class BoardManager : MonoBehaviour {
 
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
-		currentMove = new Move(tile);
-		currentMove.startingTile.DisableCollider();
-		currentMove.startingTile.MakeTransparent();
+		currentMove = new Move(this, tile);
+		currentMove.Start();
 	}
 
 	public void MouseInTile(Tile tile){
 		if(currentMove != null){
 			currentMove.MoveToTile(tile);
-			currentMove.ComputeMoveDirection(this);
 		}
 	}
 
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
+		print ("BoardManager.MouseUp() moveDirection: " + currentMove.moveDirection);
 
         if (currentMove.isClick) {
+			print("currentMove.isClick");
 			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
                 AfterRotate();
@@ -275,7 +276,7 @@ public class BoardManager : MonoBehaviour {
 			ResetMergedFlags();
 			
         	bool moveMade = false;
-			
+
 			if(currentMove.moveDirection == MoveDirection.Left ){
 				while (MakeOneMoveDownIndex(rows[currentMove.currentTile.row])) {
 					moveMade = true;
@@ -383,9 +384,11 @@ public class BoardManager : MonoBehaviour {
 	}
 
 	void ResetDraggedTiles(){
-		currentMove.startingTile.EnableCollider();
-		currentMove.startingTile.ResetToCanonicalPosition();
-		currentMove.startingTile.MakeOpaque();
+		currentMove.Stop();
+
+//		currentMove.startingTile.EnableCollider();
+//		currentMove.startingTile.ResetToCanonicalPosition();
+//		currentMove.startingTile.MakeOpaque();
 		currentMove = null;
 	}
 
@@ -399,7 +402,8 @@ public class BoardManager : MonoBehaviour {
 				newPos.x = currentMove.startingTile.canonicalPosition.x;
 			}
 
-			currentMove.startingTile.transform.position = newPos;
+//			currentMove.startingTile.transform.position = newPos;
+			currentMove.startingTile.MoveTo(newPos);
 		}
 
 
@@ -421,73 +425,4 @@ public class BoardManager : MonoBehaviour {
 			}
 		}
 	}
-}
-
-public enum MoveDirection {
-	Up, Down, Left, Right
-};
-
-public class Move {
-	public Tile startingTile;
-	public Tile currentTile;
-	public Tile[] tileList;
-	public MoveDirection moveDirection;
-	public bool isClick;
-
-	Vector3 startingMousePositionScreenSpace; // screen space
-
-	public Move(Tile startingTile){
-		this.startingTile = startingTile;
-		this.currentTile = startingTile;
-		this.startingMousePositionScreenSpace = Input.mousePosition;
-		isClick = true;
-	}
-
-	public Vector3 GetMouseMoveScreenSpace(){
-		return Input.mousePosition - startingMousePositionScreenSpace;
-	}
-
-	public Vector3 GetMouseMoveWorldSpace(){
-		Vector3 move = Camera.main.ScreenToWorldPoint(Input.mousePosition) - Camera.main.ScreenToWorldPoint(startingMousePositionScreenSpace);
-		move.z = 0;
-		return move;
-	}
-
-	public void MoveToTile(Tile tile){
-		currentTile = tile;
-		if(!currentTile.SameTile(startingTile)){
-			isClick = false;
-		}
-	}
-
-	public void ComputeMoveDirection(BoardManager boardManager){
-		if (!startingTile.SameTile(currentTile)) {
-
-			// figure out if we're dragging the column or the row
-			if(startingTile.col == currentTile.col){
-				tileList = boardManager.columns[currentTile.col];
-				
-				// determine direction of move within col
-				if(currentTile.row > startingTile.row){
-					moveDirection = MoveDirection.Up;
-				} else {
-					moveDirection = MoveDirection.Down;
-				}
-
-			}
-
-			if(startingTile.row == currentTile.row){
-				tileList = boardManager.rows[currentTile.row];
-
-				// determine direction of move within row
-				if(currentTile.col > startingTile.col){
-					moveDirection = MoveDirection.Right;
-				} else {
-					moveDirection = MoveDirection.Left;
-				}
-			
-			}
-		}
-	}
-	
 }
