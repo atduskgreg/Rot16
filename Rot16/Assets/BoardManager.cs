@@ -263,10 +263,7 @@ public class BoardManager : MonoBehaviour {
 	Tile lastRotatedTile;
 
 	public void MouseUp(){
-		print ("BoardManager.MouseUp() moveDirection: " + currentMove.moveDirection);
-
         if (currentMove.isClick) {
-			print("currentMove.isClick");
 			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
                 AfterRotate();

@@ -42,13 +42,21 @@ public class Move {
 	}
 
 	public void Start(){
-		foreach(Tile tile in Tileset()){
+		Start(Tileset());
+	}
+
+	public void Stop(){
+		Stop(Tileset ());
+	}
+
+	void Start(Tile[] tileset){
+		foreach(Tile tile in tileset){
 			tile.MakeTransparent();
 		}
 	}
 
-	public void Stop(){
-		foreach(Tile tile in Tileset()){
+	void Stop(Tile[] tileset){
+		foreach(Tile tile in tileset){
 			tile.ResetToCanonicalPosition();
 			tile.MakeOpaque();
 		}
@@ -63,10 +71,18 @@ public class Move {
 			return new Tile[]{startingTile}; 
 		}
 	}
+
+	void MoveDirectionChanged(Tile[] prevSet){
+		Stop(prevSet);
+		Start(Tileset());
+	}
 	
 	public void ComputeMoveDirection(){
 		if (!startingTile.SameTile(currentTile)) {
-			
+
+			MoveDirection prev = moveDirection;
+			Tile[] prevSet = Tileset();
+
 			// figure out if we're dragging the column or the row
 			if(startingTile.col == currentTile.col){
 				tileList = boardManager.columns[currentTile.col];
@@ -90,6 +106,9 @@ public class Move {
 					moveDirection = MoveDirection.Left;
 				}
 				
+			}
+			if(prev != moveDirection){
+				MoveDirectionChanged(prevSet);
 			}
 		}
 	}
