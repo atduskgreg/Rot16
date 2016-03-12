@@ -1,10 +1,9 @@
 ## Rot16
 
-A game!
+A game! Head-to-head 2048 but with shapes.
 
 ### TODO
 
-* Check for adjacent tile combinability
-* UI for initiating drag
-* GameManager implements drag combine
-* Generate and display next tile
+* Interactive drag should move all tiles in the row or column
+* Interactive drag should overlap tiles that can be combined
+* Fix path drawing overlap bug on diagonals (polygon offsetting)
