@@ -153,19 +153,14 @@ public class Tile : MonoBehaviour {
 	}
 
 	void OnMouseEnter(){
-		print ("mouse enter: " + row +"x"+col);
-
 		boardManager.MouseInTile(GetComponent<Tile>());
 	}
  
 	void OnMouseDown(){
-		print ("mouse down: " + row +"x"+col);
-
 		boardManager.MouseDownInTile(GetComponent<Tile>());
 	}
 	
 	void OnMouseUp(){
-		print ("mouse up: " + row +"x"+col);
 		boardManager.MouseUp();
 	}
 }

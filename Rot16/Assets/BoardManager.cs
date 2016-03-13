@@ -388,10 +388,6 @@ public class BoardManager : MonoBehaviour {
 
 	void ResetDraggedTiles(){
 		currentMove.Stop();
-
-//		currentMove.startingTile.EnableCollider();
-//		currentMove.startingTile.ResetToCanonicalPosition();
-//		currentMove.startingTile.MakeOpaque();
 		currentMove = null;
 	}
 
@@ -399,14 +395,16 @@ public class BoardManager : MonoBehaviour {
 		if(currentMove != null){
 			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
 			newPos.z = -10;
-			if(currentMove.moveDirection == MoveDirection.Left || currentMove.moveDirection == MoveDirection.Right){
-				newPos.y = currentMove.startingTile.canonicalPosition.y;
-			} else if(currentMove.moveDirection == MoveDirection.Up || currentMove.moveDirection == MoveDirection.Down){
-				newPos.x = currentMove.startingTile.canonicalPosition.x;
-			}
 
-//			currentMove.startingTile.transform.position = newPos;
-			currentMove.startingTile.MoveTo(newPos);
+//			if(currentMove.moveDirection == MoveDirection.Left || currentMove.moveDirection == MoveDirection.Right){
+//				newPos.y = currentMove.startingTile.canonicalPosition.y;
+//			} else if(currentMove.moveDirection == MoveDirection.Up || currentMove.moveDirection == MoveDirection.Down){
+//				newPos.x = currentMove.startingTile.canonicalPosition.x;
+//			}
+
+			currentMove.MoveTiles();
+
+			//currentMove.startingTile.MoveTo(newPos);
 		}
 
 

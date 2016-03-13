@@ -61,6 +61,42 @@ public class Move {
 			tile.MakeOpaque();
 		}
 	}
+
+	public void MoveTiles(){
+		Vector3 moveOffset = GetMouseMoveWorldSpace();
+		if(moveDirection == MoveDirection.Left || moveDirection == MoveDirection.Right){
+			moveOffset.y = 0;
+		} else if(moveDirection == MoveDirection.Up || moveDirection == MoveDirection.Down){
+			moveOffset.x = 0;
+		}
+
+
+		Tile[] tileset = (Tile[])Tileset().Clone();
+		int numTilesMoving = 0;
+		if(moveDirection == MoveDirection.Right || moveDirection == MoveDirection.Up){
+			System.Array.Reverse(tileset);
+		}
+
+		for(int i = 1 ; i < tileset.Length; i++){
+			Tile tile = tileset[i];
+
+			bool shouldMove = true;
+
+			if(tile.CanCombineWith(tileset[i-1]) || tileset[i-1].isEmpty()){
+				shouldMove =  true;
+			} else {
+				shouldMove = false;
+			}
+
+			if(shouldMove){
+				numTilesMoving++;
+			}
+
+			if(shouldMove){
+				tile.MoveTo(tile.canonicalPosition + moveOffset*numTilesMoving);
+			}
+		}
+	}
 	
 	Tile[] Tileset(){
 		if(moveDirection == MoveDirection.Left || moveDirection == MoveDirection.Right){
