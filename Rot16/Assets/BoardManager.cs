@@ -250,19 +250,25 @@ public class BoardManager : MonoBehaviour {
 
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
+		if (tile == NextTile) { return; }
+		
 		currentMove = new Move(this, tile);
 		currentMove.Start();
 	}
-
+	
 	public void MouseInTile(Tile tile){
-		if(currentMove != null){
-			currentMove.MoveToTile(tile);
-		}
+		if (tile == NextTile) { return; }
+		if (currentMove == null) { return; }
+		
+		currentMove.MoveToTile(tile);
+		currentMove.ComputeMoveDirection();
 	}
-
+	
 	Tile lastRotatedTile;
-
+	
 	public void MouseUp(){
+		if (currentMove == null) { return; }
+
         if (currentMove.isClick) {
 			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
