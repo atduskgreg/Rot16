@@ -72,12 +72,41 @@ public class Tile : MonoBehaviour {
 		}
 	}
 
-	public void MoveTo(Vector3 newPos) {
-		tileDisplay.transform.position = newPos;
+	public bool CanRotate(){
+		Dictionary<int, int> rotDict = new Dictionary<int, int>(){
+			{0, 1},
+			{1, 0},
+			{2,2},
+			{3,3},
+			{4,5},
+			{5,6},
+			{6,7},
+			{7,4},
+			{8,9},
+			{9,10},
+			{10,11},
+			{11,8},
+			{12,13},
+			{13,14},
+			{14,15},
+			{15,12}
+		};
+
+		return (rotDict[tileId] != tileId);
 	}
 
+	// returns true if constrained by the edge of the board
+	public bool MoveTo(Vector3 newPos) {
+		
+		tileDisplay.transform.position = boardManager.ConstrainToBoard(newPos);
 
-
+		if(tileDisplay.transform.position == newPos){
+			return false;
+		} else {
+			return true;
+		}
+	}
+		
 	// if this is not an empty tile
 	// it can move into the place of empty tiles
 	public bool CanMoveInto(Tile tile){

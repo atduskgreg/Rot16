@@ -5,6 +5,10 @@ using UnityEngine.UI;
 using Vectrosity;
 
 public class BoardManager : MonoBehaviour {
+	public GameObject Playfield;
+
+	public float maxClickTimeSeconds = 0.5f;
+
 	public int numStartingTiles = 2;
 	public Text HorizontalScoreText;
 	public Text VerticalScoreText;
@@ -29,6 +33,7 @@ public class BoardManager : MonoBehaviour {
 	public Tile[,] AllTiles = new Tile[4,4];
 	public List <Tile[]> columns = new List<Tile[]> ();
 	public List <Tile[]> rows = new List<Tile[]> ();
+
 
 	private int horizontalScore = 0;
 	private int verticalScore = 0;
@@ -93,8 +98,6 @@ public class BoardManager : MonoBehaviour {
 		
 		return score;
 	}
-
-
 
 	void PopulateTiles(){
 		for (int col = 0; col < gridWidth; col++) {
@@ -248,6 +251,23 @@ public class BoardManager : MonoBehaviour {
 		}
 	}
 
+	public float GetSpriteSize(){
+		return spriteSize;
+	}
+
+	public Vector3 ConstrainToBoard(Vector3 pos){
+		float xMin = rows[0][0].canonicalPosition.x;
+		float yMin = rows[0][0].canonicalPosition.y;
+
+		float xMax = columns[gridWidth-1][gridWidth-1].canonicalPosition.x;
+		float yMax = columns[gridWidth-1][gridWidth-1].canonicalPosition.y;
+
+		float x = Mathf.Clamp(pos.x, xMin, xMax);
+		float y = Mathf.Clamp(pos.y, yMin, yMax);
+
+		return new Vector3(x,y,pos.z);
+	}
+
 	Move currentMove;
 	public void MouseDownInTile(Tile tile){
 		if (tile == NextTile) { return; }
@@ -259,9 +279,11 @@ public class BoardManager : MonoBehaviour {
 	public void MouseInTile(Tile tile){
 		if (tile == NextTile) { return; }
 		if (currentMove == null) { return; }
-		
+
 		currentMove.MoveToTile(tile);
-		currentMove.ComputeMoveDirection();
+//		if(currentMove.HasLeftTile()){
+//			currentMove.ComputeMoveDirection();
+//		}
 	}
 	
 	Tile lastRotatedTile;
@@ -269,8 +291,15 @@ public class BoardManager : MonoBehaviour {
 	public void MouseUp(){
 		if (currentMove == null) { return; }
 
-        if (currentMove.isClick) {
-			if(!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile)){
+		if(currentMove.Duration() > maxClickTimeSeconds && currentMove.currentTile.SameTile(currentMove.startingTile)){ 
+			ResetDraggedTiles();
+			return; 
+		}
+
+
+        if (currentMove.moveDirection == MoveDirection.Click) {
+
+			if(currentMove.currentTile.CanRotate() && (!lastRotatedTile || !currentMove.currentTile.SameTile(lastRotatedTile))){
 				currentMove.currentTile.GetComponent<Tile>().rotateTile();
                 AfterRotate();
 			}
@@ -393,8 +422,8 @@ public class BoardManager : MonoBehaviour {
 
 	void Update () {
 		if(currentMove != null){
-			Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
-			newPos.z = -10;
+			//Vector3 newPos = currentMove.startingTile.canonicalPosition + currentMove.GetMouseMoveWorldSpace();
+			//newPos.z = -10;
 
 //			if(currentMove.moveDirection == MoveDirection.Left || currentMove.moveDirection == MoveDirection.Right){
 //				newPos.y = currentMove.startingTile.canonicalPosition.y;

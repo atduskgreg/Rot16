@@ -2,7 +2,7 @@
 using System.Collections;
 
 public enum MoveDirection {
-	Up, Down, Left, Right
+	Up, Down, Left, Right, Click
 };
 
 public class Move {
@@ -12,6 +12,8 @@ public class Move {
 	public MoveDirection moveDirection;
 	public bool isClick;
 	BoardManager boardManager;
+
+	private float startTime;
 	
 	Vector3 startingMousePositionScreenSpace; // screen space
 	
@@ -19,8 +21,10 @@ public class Move {
 		this.boardManager = boardManager;
 		this.startingTile = startingTile;
 		this.currentTile = startingTile;
+		this.moveDirection = MoveDirection.Click;
 		this.startingMousePositionScreenSpace = Input.mousePosition;
-		isClick = true;
+//		isClick = true;
+		startTime = Time.fixedTime;
 	}
 	
 	public Vector3 GetMouseMoveScreenSpace(){
@@ -32,12 +36,17 @@ public class Move {
 		move.z = 0;
 		return move;
 	}
+
+	public float Duration(){
+		return Time.fixedTime - startTime;
+	}
+
+	public bool HasLeftTile(){
+		return !currentTile.SameTile(startingTile);
+	}
 	
 	public void MoveToTile(Tile tile){
 		currentTile = tile;
-		if(!currentTile.SameTile(startingTile)){
-			isClick = false;
-		}
 		ComputeMoveDirection();
 	}
 
@@ -62,6 +71,9 @@ public class Move {
 		}
 	}
 
+	// todo: move direction doesn't get computed until
+	// we leave the tile so tile is sticky until you slide out of it
+	// maybe this is good?
 	public void MoveTiles(){
 		Vector3 moveOffset = GetMouseMoveWorldSpace();
 		if(moveDirection == MoveDirection.Left || moveDirection == MoveDirection.Right){
@@ -72,29 +84,45 @@ public class Move {
 
 
 		Tile[] tileset = (Tile[])Tileset().Clone();
-		int numTilesMoving = 0;
 		if(moveDirection == MoveDirection.Right || moveDirection == MoveDirection.Up){
+			//Debug.Log("reversing");
 			System.Array.Reverse(tileset);
 		}
 
+		//Debug.Log("start");
+		int numTilesMoving = 0;
+		bool alreadyCombined = false;
+		bool previousTileStopped = false;
+		Vector3 totalAmountMoved = new Vector3();
 		for(int i = 1 ; i < tileset.Length; i++){
 			Tile tile = tileset[i];
 
-			bool shouldMove = true;
 
-			if(tile.CanCombineWith(tileset[i-1]) || tileset[i-1].isEmpty()){
-				shouldMove =  true;
-			} else {
-				shouldMove = false;
-			}
-
-			if(shouldMove){
+			bool shouldMove = false;
+			if(tile.CanCombineWith(tileset[i-1]) && !alreadyCombined){
 				numTilesMoving++;
+				alreadyCombined = true;
+				shouldMove = true;
 			}
 
-			if(shouldMove){
-				tile.MoveTo(tile.canonicalPosition + moveOffset*numTilesMoving);
+			if(tileset[i-1].isEmpty()){
+				numTilesMoving++;
+				shouldMove = true;
 			}
+
+				//Debug.Log("numTilesMoving: " + numTilesMoving);
+				float maxMoveDist = numTilesMoving * boardManager.GetSpriteSize();
+				float moveMag = moveOffset.magnitude;
+//				Debug.Log("maxMoveDist: " + maxMoveDist + " moveMag: " + moveMag);
+				float clampedMoveMag = Mathf.Clamp(moveMag, 0, maxMoveDist);
+			//moveOffset.Normalize();
+			//moveOffset = moveOffset * clampedMoveMag;
+		
+			tile.MoveTo(tile.canonicalPosition + moveOffset*numTilesMoving);
+		
+
+	
+				
 		}
 	}
 	
@@ -114,7 +142,7 @@ public class Move {
 	}
 	
 	public void ComputeMoveDirection(){
-		if (!startingTile.SameTile(currentTile)) {
+		if (HasLeftTile()) {
 
 			MoveDirection prev = moveDirection;
 			Tile[] prevSet = Tileset();
@@ -147,6 +175,8 @@ public class Move {
 				MoveDirectionChanged(prevSet);
 			}
 		}
+	//	Debug.Log("movedir: " + moveDirection);
+
 	}
 	
 }
